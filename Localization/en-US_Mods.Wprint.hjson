@@ -3,7 +3,7 @@
 
 Items: {
 	sample: {
-		DisplayName: "sample"
+		DisplayName: sample
 		Tooltip:
 			'''
 			Template of an item
@@ -11,4 +11,19 @@ Items: {
 			It's snowing on Mt.Fuji
 			'''
 	}
+
+	Nail: {
+		DisplayName: Nail
+		Tooltip: ""
+	}
+
+	Clawline: {
+		DisplayName: Clawline
+		Tooltip: ""
+	}
+}
+
+Projectiles: {
+	NailSlash.DisplayName: Nail Slash
+	ClawlineHook.DisplayName: Clawline Hook
 }
