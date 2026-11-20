@@ -1,6 +1,7 @@
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Wprint.Content.Players;
 
 namespace Wprint.Content.Items
 {
@@ -8,25 +9,37 @@ namespace Wprint.Content.Items
 	{
 		public override void SetDefaults()
 		{
+			// Basic weapon stats and how often the axe can be used.
 			Item.damage = 50;
 			Item.DamageType = DamageClass.Ranged;
-			Item.width = 40;
-			Item.height = 40;
-			Item.useTime = 20;
-			Item.useAnimation = 20;
+			Item.width = 70;
+			Item.height = 70;
+			Item.useTime = 30;
+			Item.useAnimation = 30;
 			Item.useStyle = ItemUseStyleID.Swing;
+            Item.noUseGraphic = true;
+            Item.crit = 10;
 			Item.knockBack = 6;
 			Item.value = Item.buyPrice(silver: 1);
 			Item.rare = ItemRarityID.Blue;
 			Item.UseSound = SoundID.Item1;
 			Item.autoReuse = true;
-            Item.shootSpeed = 20f;
+			// Configure the thrown projectile and its initial speed.
+            Item.shootSpeed = 18f;
             Item.shoot = ModContent.ProjectileType<catchableaxeProjectile>();
             Item.useTurn = true;
 		}
 
+		public override float UseSpeedMultiplier(Player player)
+		{
+			// This is a speed multiplier: doubling it at ten stacks halves the 30-tick use interval.
+			int stacks = player.GetModPlayer<CatchableAxePlayer>().Stacks;
+			return 1f / (1f - stacks * 0.05f);
+		}
+
 		public override void AddRecipes()
 		{
+			// Make this axe at a work bench using one dirt block.
 			Recipe recipe = CreateRecipe();
 			recipe.AddIngredient(ItemID.DirtBlock, 1);
 			recipe.AddTile(TileID.WorkBenches);

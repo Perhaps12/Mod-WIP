@@ -19,3 +19,21 @@ Items: {
 }
 
 Projectiles.catchableaxeProjectile.DisplayName: catchableaxe Projectile
+
+Buffs: {
+	CatchableAxeBuff: {
+		DisplayName: Axe Catch
+		Description:
+			'''
+			Stacks: {0}/10
+			Time remaining: {1}s
+			Each stack increases this axe's damage by 10%
+			At 10 stacks, hits cause bleeding
+			'''
+	}
+
+	CatchableAxeSpeedBuff: {
+		DisplayName: Axe Rush
+		Description: Catching the axe at maximum stacks briefly increases movement speed
+	}
+}
