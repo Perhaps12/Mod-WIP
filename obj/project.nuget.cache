@@ -1,8 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "Yne7RRU4kcE=",
+  "dgSpecHash": "/Z3JWL5wzW4=",
   "success": true,
-  "projectFilePath": "C:\\Users\\howlo\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\Wprint\\Wprint.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\tulli\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\Mod-WIP\\Wprint.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\tulli\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.31\\microsoft.netcore.app.ref.8.0.31.nupkg.sha512",
+    "C:\\Users\\tulli\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.31\\microsoft.windowsdesktop.app.ref.8.0.31.nupkg.sha512",
+    "C:\\Users\\tulli\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.31\\microsoft.aspnetcore.app.ref.8.0.31.nupkg.sha512"
+  ],
   "logs": []
 }
