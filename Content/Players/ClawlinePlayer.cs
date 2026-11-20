@@ -9,15 +9,13 @@ namespace Wprint.Content.Players
 	//  - ForcedVelocity: the hook sets this every tick it wants control of the player's movement.
 	//    When it stops setting it, the player moves normally and keeps their velocity (momentum).
 	//  - Air charges: only MaxAirCharges uses while airborne; touching the ground refills them.
-	//  - Jump cancel: pressing Jump while the hook is out cancels it and jumps, like vanilla hooks.
+	//  - Jump can't cancel the Clawline; once fired it always plays out.
 	public class ClawlinePlayer : ModPlayer
 	{
 		public const int MaxAirCharges = 1;
 
 		public Vector2? ForcedVelocity;
 		public int AirCharges = MaxAirCharges;
-
-		bool jumpHeldLastTick;
 
 		int HookType => ModContent.ProjectileType<ClawlineHook>();
 
@@ -47,24 +45,6 @@ namespace Wprint.Content.Players
 
 		public override void PreUpdateMovement()
 		{
-			if (Player.whoAmI == Main.myPlayer)
-			{
-				bool jumpPressed = Player.controlJump && !jumpHeldLastTick;
-				jumpHeldLastTick = Player.controlJump;
-
-				// Jump only cancels during the pull, not while the hook is flying or hovering
-				if (jumpPressed && TryCancelPullingHook())
-				{
-					ForcedVelocity = null;
-
-					// Same as releasing a vanilla grappling hook: jump, keeping horizontal momentum
-					Player.velocity.Y = -Player.jumpSpeed * Player.gravDir;
-					Player.jump = Player.jumpHeight;
-					Player.fallStart = (int)(Player.position.Y / 16f);
-					return;
-				}
-			}
-
 			if (ForcedVelocity is Vector2 v)
 			{
 				// While held still, vanilla thinks you're on the ground (vertical speed is 0), so a
@@ -81,26 +61,6 @@ namespace Wprint.Content.Players
 			// Touching the ground recharges the air uses
 			if (!HookOut && OnGround)
 				AirCharges = MaxAirCharges;
-		}
-
-		// Kills this player's Clawline if it's currently pulling. Returns true if one was cancelled.
-		bool TryCancelPullingHook()
-		{
-			if (!HookOut)
-				return false;
-
-			bool cancelled = false;
-			for (int i = 0; i < Main.maxProjectiles; i++)
-			{
-				Projectile p = Main.projectile[i];
-				if (p.active && p.owner == Player.whoAmI && p.type == HookType
-					&& p.ModProjectile is ClawlineHook hook && hook.IsPulling)
-				{
-					p.Kill();
-					cancelled = true;
-				}
-			}
-			return cancelled;
 		}
 	}
 }
