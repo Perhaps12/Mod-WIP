@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\tulli\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\Mod-WIP\\Wprint.csproj": {}
+    "C:\\Users\\tulli\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\Wprint\\Wprint.csproj": {}
   },
   "projects": {
-    "C:\\Users\\tulli\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\Mod-WIP\\Wprint.csproj": {
+    "C:\\Users\\tulli\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\Wprint\\Wprint.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\tulli\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\Mod-WIP\\Wprint.csproj",
+        "projectUniqueName": "C:\\Users\\tulli\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\Wprint\\Wprint.csproj",
         "projectName": "Wprint",
-        "projectPath": "C:\\Users\\tulli\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\Mod-WIP\\Wprint.csproj",
+        "projectPath": "C:\\Users\\tulli\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\Wprint\\Wprint.csproj",
         "packagesPath": "C:\\Users\\tulli\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\tulli\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\Mod-WIP\\obj\\",
+        "outputPath": "C:\\Users\\tulli\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\Wprint\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\tulli\\AppData\\Roaming\\NuGet\\NuGet.Config",

@@ -3,7 +3,7 @@
 
 Items: {
 	sample: {
-		DisplayName: "sample"
+		DisplayName: sample
 		Tooltip:
 			'''
 			Template of an item
