@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Wprint")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+69417c5f6ab23b0ad8d9c38f499dc4ccf15c0f2a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4ad18019cdec5ee14ae8b8b15d5dc8c819cd10d0")]
 [assembly: System.Reflection.AssemblyProductAttribute("Wprint")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Wprint")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
