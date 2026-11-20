@@ -10,7 +10,7 @@ namespace Wprint.Content.Items
 		public override void SetDefaults()
 		{
 			// Basic weapon stats and how often the axe can be used.
-			Item.damage = 50;
+			Item.damage = 27;
 			Item.DamageType = DamageClass.Ranged;
 			Item.width = 70;
 			Item.height = 70;
@@ -18,10 +18,10 @@ namespace Wprint.Content.Items
 			Item.useAnimation = 30;
 			Item.useStyle = ItemUseStyleID.Swing;
             Item.noUseGraphic = true;
-            Item.crit = 10;
+            Item.crit = 19;
 			Item.knockBack = 6;
-			Item.value = Item.buyPrice(silver: 1);
-			Item.rare = ItemRarityID.Blue;
+			Item.value = Item.buyPrice(gold: 1);
+			Item.rare = ItemRarityID.Orange;
 			Item.UseSound = SoundID.Item1;
 			Item.autoReuse = true;
 			// Configure the thrown projectile and its initial speed.
