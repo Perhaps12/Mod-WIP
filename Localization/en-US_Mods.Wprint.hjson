@@ -21,9 +21,19 @@ Items: {
 		DisplayName: Clawline
 		Tooltip: ""
 	}
+
+	BlastPack: {
+		DisplayName: Blast Pack
+		Tooltip:
+			'''
+			Sticks to surfaces and explodes after a short delay, launching you away from the blast
+			Right click to detonate all of your Blast Packs
+			'''
+	}
 }
 
 Projectiles: {
 	NailSlash.DisplayName: Nail Slash
 	ClawlineHook.DisplayName: Clawline Hook
+	BlastPackProjectile.DisplayName: Blast Pack
 }

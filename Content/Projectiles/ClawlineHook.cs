@@ -15,7 +15,7 @@ namespace Wprint.Content.Projectiles
 	//   Latched    - stuck in a tile or enemy, or floating at max range after a miss; short pause before the pull
 	//   Pulling    - yanks the player to the hook. On arrival the player keeps their velocity,
 	//                or, if the hook is in an enemy, bounces back and upward off it (pogo-style).
-	//                Jump cancels the hook only during this state.
+	//                Jump can't cancel the hook in any state.
 	//                If the enemy dies, the hook stays where it was and still pulls (no bounce).
 	public class ClawlineHook : ModProjectile
 	{
@@ -37,9 +37,6 @@ namespace Wprint.Content.Projectiles
 		}
 
 		ref float Timer => ref Projectile.ai[1];
-
-		// Used by ClawlinePlayer: Jump only cancels the hook while it's pulling
-		public bool IsPulling => CurrentState == State.Pulling;
 
 		// whoAmI of the enemy we're stuck in, or -1. Stored +1 so the default 0 means "none".
 		int TargetNPC
