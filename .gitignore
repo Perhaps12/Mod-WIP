@@ -1,0 +1,7 @@
+# Build output (regenerated on every build)
+bin/
+obj/
+
+# Visual Studio / IDE
+.vs/
+*.user
