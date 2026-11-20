@@ -11,4 +11,11 @@ Items: {
 			It's snowing on Mt.Fuji
 			'''
 	}
+
+	catchableaxe: {
+		DisplayName: catchableaxe
+		Tooltip: ""
+	}
 }
+
+Projectiles.catchableaxeProjectile.DisplayName: catchableaxe Projectile

@@ -1,0 +1,13 @@
+C:\Users\tulli\OneDrive\Documents\My Games\Terraria\tModLoader\ModSources\Wprint\obj\Debug\net8.0\Wprint.csproj.AssemblyReference.cache
+C:\Users\tulli\OneDrive\Documents\My Games\Terraria\tModLoader\ModSources\Wprint\obj\Debug\net8.0\Wprint.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\tulli\OneDrive\Documents\My Games\Terraria\tModLoader\ModSources\Wprint\obj\Debug\net8.0\Wprint.AssemblyInfoInputs.cache
+C:\Users\tulli\OneDrive\Documents\My Games\Terraria\tModLoader\ModSources\Wprint\obj\Debug\net8.0\Wprint.AssemblyInfo.cs
+C:\Users\tulli\OneDrive\Documents\My Games\Terraria\tModLoader\ModSources\Wprint\obj\Debug\net8.0\Wprint.csproj.CoreCompileInputs.cache
+C:\Users\tulli\OneDrive\Documents\My Games\Terraria\tModLoader\ModSources\Wprint\obj\Debug\net8.0\Wprint.sourcelink.json
+C:\Users\tulli\OneDrive\Documents\My Games\Terraria\tModLoader\ModSources\Wprint\bin\Debug\net8.0\Wprint.deps.json
+C:\Users\tulli\OneDrive\Documents\My Games\Terraria\tModLoader\ModSources\Wprint\bin\Debug\net8.0\Wprint.dll
+C:\Users\tulli\OneDrive\Documents\My Games\Terraria\tModLoader\ModSources\Wprint\bin\Debug\net8.0\Wprint.pdb
+C:\Users\tulli\OneDrive\Documents\My Games\Terraria\tModLoader\ModSources\Wprint\obj\Debug\net8.0\Wprint.dll
+C:\Users\tulli\OneDrive\Documents\My Games\Terraria\tModLoader\ModSources\Wprint\obj\Debug\net8.0\refint\Wprint.dll
+C:\Users\tulli\OneDrive\Documents\My Games\Terraria\tModLoader\ModSources\Wprint\obj\Debug\net8.0\Wprint.pdb
+C:\Users\tulli\OneDrive\Documents\My Games\Terraria\tModLoader\ModSources\Wprint\obj\Debug\net8.0\ref\Wprint.dll
