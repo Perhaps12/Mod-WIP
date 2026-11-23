@@ -1,5 +1,7 @@
 using System;
+using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Audio;
@@ -17,7 +19,7 @@ namespace Wprint.Content.Items
 		private const float MinimumBounceVerticalSpeed = 2f;
 		private const float MovementPredictionAccuracy = 0.5f;
 		private const float PlayerMomentumBoost = 0.65f;
-		private const float LandingErrorRange = 100f;
+		private const float LandingErrorRange = 140f;
 		private static readonly int BounceFlightTicks = (int)Math.Ceiling(
 			BounceVerticalSpeed / NormalGravity
 			+ BounceVerticalSpeed / Math.Sqrt(NormalGravity * BouncedFallGravity));
@@ -28,8 +30,8 @@ namespace Wprint.Content.Items
 		public override void SetDefaults()
         {
             // Set the projectile's size, damage type, hit limit, lifetime, and collision behavior.
-            Projectile.width = 70;
-            Projectile.height = 70;
+            Projectile.width = 75;
+            Projectile.height = 75;
             Projectile.friendly = true;
             Projectile.hostile = false;
             Projectile.DamageType = DamageClass.Ranged;
@@ -37,6 +39,22 @@ namespace Wprint.Content.Items
             Projectile.timeLeft = 600;
             Projectile.tileCollide = true;
             Projectile.ignoreWater = true;
+        }
+
+        public override void OnSpawn(IEntitySource source)
+        {
+            if (Projectile.owner == Main.myPlayer)
+            {
+                Projectile.ai[1] = Main.rand.Next(2) == 0 ? -1f : 1f;
+                Projectile.netUpdate = true;
+            }
+        }
+
+        public override Color? GetAlpha(Color lightColor)
+        {
+            return Projectile.ai[0] == 1f
+                ? Color.Lerp(lightColor, Color.Gold, 0.65f)
+                : null;
         }
 
         public override void AI()
@@ -68,7 +86,7 @@ namespace Wprint.Content.Items
             }
 
             // Each stack makes the axe spin faster while it is moving.
-            Projectile.rotation += (0.4f + stacks * 0.05f) * Projectile.direction;
+            Projectile.rotation += (0.5f + stacks * 0.06f) * Projectile.direction * Projectile.ai[1];
 
             // ai[0] is set after an NPC hit, so the axe can only be caught after bouncing.
             if (Projectile.ai[0] == 1f && owner.active && !owner.dead && owner.Hitbox.Intersects(Projectile.Hitbox))
@@ -100,10 +118,10 @@ namespace Wprint.Content.Items
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
-            // At maximum stacks, hits also give the target Bleeding.
+            // At maximum stacks, hits also give the target OnFire.
             if (Main.player[Projectile.owner].GetModPlayer<CatchableAxePlayer>().Stacks >= CatchableAxePlayer.MaxStacks)
             {
-                target.AddBuff(BuffID.Bleeding, 300);
+                target.AddBuff(BuffID.OnFire, 300);
             }
 
             //SoundEngine.PlaySound(SoundID.Item174, Projectile.position);

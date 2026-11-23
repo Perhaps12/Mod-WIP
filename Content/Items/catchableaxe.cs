@@ -12,8 +12,8 @@ namespace Wprint.Content.Items
 			// Basic weapon stats and how often the axe can be used.
 			Item.damage = 27;
 			Item.DamageType = DamageClass.Ranged;
-			Item.width = 70;
-			Item.height = 70;
+			Item.width = 75;
+			Item.height = 75;
 			Item.useTime = 30;
 			Item.useAnimation = 30;
 			Item.useStyle = ItemUseStyleID.Swing;

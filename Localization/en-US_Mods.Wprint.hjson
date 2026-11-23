@@ -13,7 +13,7 @@ Items: {
 	}
 
 	catchableaxe: {
-		DisplayName: catchableaxe
+		DisplayName: Champion's Axe
 		Tooltip: ""
 	}
 
@@ -62,7 +62,7 @@ Projectiles: {
 
 Buffs: {
 	CatchableAxeBuff: {
-		DisplayName: Axe Catch
+		DisplayName: Spinning Axe
 		Description:
 			'''
 			Stacks: {0}/10
@@ -73,7 +73,7 @@ Buffs: {
 	}
 
 	CatchableAxeSpeedBuff: {
-		DisplayName: Axe Rush
+		DisplayName: Blood Rush
 		Description: Catching the axe at maximum stacks briefly increases movement speed
 	}
 
