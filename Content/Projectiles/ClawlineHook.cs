@@ -20,8 +20,8 @@ namespace Wprint.Content.Projectiles
 	public class ClawlineHook : ModProjectile
 	{
 		const float MaxRange = 20 * 16f;   // 20 tiles
-		const int LatchDelayTicks = 4;     // pause after landing before the pull starts
-		const int MissHoverTicks = 4;     // how long the hook floats at max range before pulling
+		const int LatchDelayTicks = 6;     // pause after landing before the pull starts
+		const int MissHoverTicks = 6;     // how long the hook floats at max range before pulling
 		const float PullSpeed = 22f;       // px per tick while being pulled
 		const float ReleaseSpeedMultiplier = 0.6f; // fraction of PullSpeed the player keeps after reaching the hook
 		const float BounceHorizontalSpeed = 6f; // px per tick pushed back away from the enemy

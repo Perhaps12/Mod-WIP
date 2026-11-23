@@ -19,7 +19,7 @@ namespace Wprint.Content.Projectiles
 	{
 		const int FuseTicks = 180;             // 3 seconds, same as a Sticky Grenade
 		const int BlowTicks = 3;               // last ticks of life where the explosion does damage
-		const int ExplosionSize = 336;         // px, width/height of the damaging blast (21 tiles)
+		const int ExplosionSize = 200;         // px, width/height of the damaging blast (21 tiles)
 		const float LaunchRampRadius = 8 * 16f; // launch strength ramps from Near to Far over the first 8 tiles
 		const float LaunchRadius = 12 * 16f;   // ...then stays at Far out to 12 tiles; beyond that, no launch
 		const float LaunchSpeedNear = 2f;      // px per tick at point-blank
