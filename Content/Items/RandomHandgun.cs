@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Utilities;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.Audio;
@@ -17,10 +18,18 @@ namespace Wprint.Content.Items
 	public class RandomHandgun : ModItem
 	{
 		private const int RollDurationTicks = 70;
-		private const int PreviewChangeInterval = 6;
+		private const int FastestPreviewChangeInterval = 2;
+		private const int SlowestPreviewChangeInterval = 10;
+		private const int PreviewSettleDurationTicks = 12;
 		private const int EquipPauseTicks = 40;
 		private const int EquipNoticeDurationTicks = 60;
 		private const int EmptyMagazineDisplayTicks = 10;
+		private const int KnifeEquipInwardDurationTicks = 18;
+		private const int KnifeEquipExplosionParticleCount = 40;
+		private static readonly SoundStyle RollTickSound = new SoundStyle("Wprint/Sounds/RNGGunTick")
+		{
+			MaxInstances = 0
+		};
 
 		private sealed class GunProfile
 		{
@@ -83,30 +92,30 @@ namespace Wprint.Content.Items
 		// 37 23 20 17 3 are the weights.
 		{
 			new GunProfile(
-				nameKey: "Glock", weight: 37, damage: 31, critChance: 8, useTime: 12, magazineSize: 8,
-				knockback: 3f, useSound: SoundID.Item41, equipSound: SoundID.Item149, shootSpeed: 12f,
+				nameKey: "Glock", weight: 37, damage: 31, critChance: 8, useTime: 13, magazineSize: 10,
+				knockback: 3f, useSound: new SoundStyle("Wprint/Sounds/GlockShot"), equipSound: new SoundStyle("Wprint/Sounds/GlockEquip"), shootSpeed: 12f,
 				inaccuracyDegrees: 0f, projectileTypeOverride: null, useGoldShortswordProjectile: false,
-				usesBulletAmmo: true, spriteItemType: ItemID.Handgun, tint: Color.Blue),
+				usesBulletAmmo: true, spriteItemType: ItemID.Handgun, tint: new Color(75, 105, 255)),
 			new GunProfile(
-				nameKey: "UMP", weight: 23, damage: 24, critChance: 7, useTime: 6, magazineSize: 20,
-				knockback: 2f, useSound: SoundID.Item11, equipSound: SoundID.Item149, shootSpeed: 12f,
+				nameKey: "UMP", weight: 23, damage: 22, critChance: 7, useTime: 4, magazineSize: 25,
+				knockback: 2f, useSound: new SoundStyle("Wprint/Sounds/UMPShot"), equipSound: new SoundStyle("Wprint/Sounds/UMPEquip"), shootSpeed: 12f,
 				inaccuracyDegrees: 8f, projectileTypeOverride: null, useGoldShortswordProjectile: false,
-				usesBulletAmmo: true, spriteItemType: ItemID.Uzi, tint: Color.Purple),
+				usesBulletAmmo: true, spriteItemType: ItemID.Uzi, tint: new Color(136, 71, 255)),
 			new GunProfile(
-				nameKey: "AWP", weight: 20, damage: 325, critChance: 40, useTime: 80, magazineSize: 3,
-				knockback: 10f, useSound: SoundID.Item40, equipSound: SoundID.Item149, shootSpeed: 100f,
+				nameKey: "AWP", weight: 21, damage: 400, critChance: 40, useTime: 90, magazineSize: 3,
+				knockback: 10f, useSound: new SoundStyle("Wprint/Sounds/AWPShot"), equipSound: new SoundStyle("Wprint/Sounds/AWPEquip"), shootSpeed: 100f,
 				inaccuracyDegrees: 0f, projectileTypeOverride: ProjectileID.BulletHighVelocity,
-				useGoldShortswordProjectile: false, usesBulletAmmo: true, spriteItemType: ItemID.Musket, tint: Color.Pink),
+				useGoldShortswordProjectile: false, usesBulletAmmo: true, spriteItemType: ItemID.Musket, tint: new Color(211, 44, 230)),
 			new GunProfile(
-				nameKey: "AK-47", weight: 17, damage: 47, critChance: 8, useTime: 7, magazineSize: 20,
-				knockback: 4f, useSound: SoundID.Item45, equipSound: SoundID.Item149, shootSpeed: 18f,
+				nameKey: "AK-47", weight: 16, damage: 47, critChance: 8, useTime: 7, magazineSize: 20,
+				knockback: 4f, useSound: new SoundStyle("Wprint/Sounds/AK47Shot"), equipSound: new SoundStyle("Wprint/Sounds/AK47Equip"), shootSpeed: 18f,
 				inaccuracyDegrees: 2f, projectileTypeOverride: null, useGoldShortswordProjectile: false,
-				usesBulletAmmo: true, spriteItemType: ItemID.ClockworkAssaultRifle, tint: Color.Red),
+				usesBulletAmmo: true, spriteItemType: ItemID.ClockworkAssaultRifle, tint: new Color(235, 75, 75)),
 			new GunProfile(
-				nameKey: "Knife", weight: 3, damage: 2000, critChance: 0, useTime: 5, magazineSize: 1,
-				knockback: 20f, useSound: SoundID.Item11, equipSound: SoundID.Item149, shootSpeed: 30f,
+				nameKey: "Knife", weight: 1003, damage: 2000, critChance: 0, useTime: 5, magazineSize: 1,
+				knockback: 20f, useSound: SoundID.Item11, equipSound: new SoundStyle("Wprint/Sounds/KnifeEquip"), shootSpeed: 30f,
 				inaccuracyDegrees: 0f, projectileTypeOverride: null, useGoldShortswordProjectile: true,
-				usesBulletAmmo: false, spriteItemType: ItemID.Handgun, tint: Color.Gold)
+				usesBulletAmmo: false, spriteItemType: ItemID.Handgun, tint: new Color(228, 174, 51))
 		};
 
 		private int profileIndex = -1;
@@ -114,12 +123,15 @@ namespace Wprint.Content.Items
 		private int rollTicksRemaining;
 		private int rollResultIndex = -1;
 		private int previewProfileIndex = -1;
+		private int previewTicksUntilChange;
 		private int equipPauseTicksRemaining;
 		private int equipNoticeTicksRemaining;
+		private int knifeEquipEffectTicks;
+		private SlotId? equipSoundSlot;
 		private ulong lastRollUpdateTick = ulong.MaxValue;
 
 		public bool IsRolling => rollTicksRemaining > 0;
-		public bool IsShowingEquipNotice => equipNoticeTicksRemaining > 0;
+		public bool IsShowingEquipNotice => equipNoticeTicksRemaining > 0 || IsEquipSoundPlaying();
 		public string RollPreviewName => GetProfileName(previewProfileIndex);
 		public Color RollPreviewTint => previewProfileIndex >= 0 ? Profiles[previewProfileIndex].Tint : Color.White;
 		public string EquippedProfileName => GetProfileName(profileIndex);
@@ -144,7 +156,7 @@ namespace Wprint.Content.Items
 
 		public override bool CanUseItem(Player player)
 		{
-			if (IsRolling || equipPauseTicksRemaining > 0)
+			if (IsRolling || equipPauseTicksRemaining > 0 || IsEquipSoundPlaying())
 			{
 				return false;
 			}
@@ -172,7 +184,7 @@ namespace Wprint.Content.Items
 				shotsRemaining--;
 				if (shotsRemaining <= 0)
 				{
-					StartRoll();
+					StartRoll(player);
 					player.itemAnimation = EmptyMagazineDisplayTicks;
 					player.itemTime = EmptyMagazineDisplayTicks;
 				}
@@ -243,6 +255,7 @@ namespace Wprint.Content.Items
 			tag["rollTicksRemaining"] = rollTicksRemaining;
 			tag["rollResultIndex"] = rollResultIndex;
 			tag["previewProfileIndex"] = previewProfileIndex;
+			tag["previewTicksUntilChange"] = previewTicksUntilChange;
 			tag["equipPauseTicksRemaining"] = equipPauseTicksRemaining;
 			tag["equipNoticeTicksRemaining"] = equipNoticeTicksRemaining;
 		}
@@ -254,6 +267,9 @@ namespace Wprint.Content.Items
 			rollTicksRemaining = tag.ContainsKey("rollTicksRemaining") ? tag.GetInt("rollTicksRemaining") : 0;
 			rollResultIndex = tag.ContainsKey("rollResultIndex") ? tag.GetInt("rollResultIndex") : -1;
 			previewProfileIndex = tag.ContainsKey("previewProfileIndex") ? tag.GetInt("previewProfileIndex") : -1;
+			previewTicksUntilChange = tag.ContainsKey("previewTicksUntilChange")
+				? tag.GetInt("previewTicksUntilChange")
+				: FastestPreviewChangeInterval;
 			equipPauseTicksRemaining = tag.ContainsKey("equipPauseTicksRemaining") ? tag.GetInt("equipPauseTicksRemaining") : 0;
 			equipNoticeTicksRemaining = tag.ContainsKey("equipNoticeTicksRemaining") ? tag.GetInt("equipNoticeTicksRemaining") : 0;
 
@@ -262,6 +278,7 @@ namespace Wprint.Content.Items
 				|| rollTicksRemaining < 0 || rollTicksRemaining > RollDurationTicks
 				|| (rollTicksRemaining > 0 && (rollResultIndex < 0 || rollResultIndex >= Profiles.Length))
 				|| (previewProfileIndex < -1 || previewProfileIndex >= Profiles.Length)
+				|| previewTicksUntilChange < 0 || previewTicksUntilChange > SlowestPreviewChangeInterval
 				|| equipPauseTicksRemaining < 0 || equipPauseTicksRemaining > EquipPauseTicks
 				|| equipNoticeTicksRemaining < 0 || equipNoticeTicksRemaining > EquipNoticeDurationTicks)
 			{
@@ -270,6 +287,7 @@ namespace Wprint.Content.Items
 				rollTicksRemaining = 0;
 				rollResultIndex = -1;
 				previewProfileIndex = -1;
+				previewTicksUntilChange = 0;
 				equipPauseTicksRemaining = 0;
 				equipNoticeTicksRemaining = 0;
 			}
@@ -287,6 +305,7 @@ namespace Wprint.Content.Items
 			writer.Write((byte)rollTicksRemaining);
 			writer.Write((sbyte)rollResultIndex);
 			writer.Write((sbyte)previewProfileIndex);
+			writer.Write((byte)previewTicksUntilChange);
 			writer.Write((byte)equipPauseTicksRemaining);
 			writer.Write((byte)equipNoticeTicksRemaining);
 		}
@@ -298,6 +317,7 @@ namespace Wprint.Content.Items
 			rollTicksRemaining = reader.ReadByte();
 			rollResultIndex = reader.ReadSByte();
 			previewProfileIndex = reader.ReadSByte();
+			previewTicksUntilChange = reader.ReadByte();
 			equipPauseTicksRemaining = reader.ReadByte();
 			equipNoticeTicksRemaining = reader.ReadByte();
 
@@ -306,6 +326,7 @@ namespace Wprint.Content.Items
 				|| rollTicksRemaining > RollDurationTicks
 				|| (rollTicksRemaining > 0 && (rollResultIndex < 0 || rollResultIndex >= Profiles.Length))
 				|| (previewProfileIndex < -1 || previewProfileIndex >= Profiles.Length)
+				|| previewTicksUntilChange > SlowestPreviewChangeInterval
 				|| equipPauseTicksRemaining > EquipPauseTicks
 				|| equipNoticeTicksRemaining > EquipNoticeDurationTicks)
 			{
@@ -314,6 +335,7 @@ namespace Wprint.Content.Items
 				rollTicksRemaining = 0;
 				rollResultIndex = -1;
 				previewProfileIndex = -1;
+				previewTicksUntilChange = 0;
 				equipPauseTicksRemaining = 0;
 				equipNoticeTicksRemaining = 0;
 			}
@@ -417,12 +439,14 @@ namespace Wprint.Content.Items
 			ApplyProfile();
 		}
 
-		private void StartRoll()
+		private void StartRoll(Player player)
 		{
 			rollResultIndex = RollProfile(profileIndex);
-			previewProfileIndex = Main.rand.Next(Profiles.Length);
+			previewProfileIndex = RollNextPreviewProfile();
+			previewTicksUntilChange = FastestPreviewChangeInterval;
 			rollTicksRemaining = RollDurationTicks;
 			lastRollUpdateTick = ulong.MaxValue;
+			PlayRollTickSound(player);
 		}
 
 		private void AdvanceRoll(Player player)
@@ -437,14 +461,28 @@ namespace Wprint.Content.Items
 			if (IsRolling)
 			{
 				rollTicksRemaining--;
+				int previousPreviewProfileIndex = previewProfileIndex;
 
-				if (rollTicksRemaining <= PreviewChangeInterval * 2)
+				if (rollTicksRemaining <= PreviewSettleDurationTicks)
 				{
 					previewProfileIndex = rollResultIndex;
 				}
-				else if (rollTicksRemaining % PreviewChangeInterval == 0)
+				else
 				{
-					previewProfileIndex = Main.rand.Next(Profiles.Length);
+					previewTicksUntilChange--;
+					if (previewTicksUntilChange <= 0)
+					{
+						previewProfileIndex = RollNextPreviewProfile();
+						float progress = 1f - rollTicksRemaining / (float)RollDurationTicks;
+						previewTicksUntilChange = (int)Math.Round(
+							FastestPreviewChangeInterval
+							+ (SlowestPreviewChangeInterval - FastestPreviewChangeInterval) * progress);
+					}
+				}
+
+				if (previewProfileIndex != previousPreviewProfileIndex)
+				{
+					PlayRollTickSound(player);
 				}
 
 				if (rollTicksRemaining == 0)
@@ -453,13 +491,14 @@ namespace Wprint.Content.Items
 					shotsRemaining = Profiles[profileIndex].MagazineSize;
 					rollResultIndex = -1;
 					previewProfileIndex = -1;
+					previewTicksUntilChange = 0;
 					equipPauseTicksRemaining = EquipPauseTicks;
-					equipNoticeTicksRemaining = EquipNoticeDurationTicks;
+					equipNoticeTicksRemaining = EquipPauseTicks;
 					ApplyProfile();
 
 					if (player.whoAmI == Main.myPlayer && Main.netMode != NetmodeID.Server)
 					{
-						SoundEngine.PlaySound(Profiles[profileIndex].EquipSound, player.Center);
+						equipSoundSlot = SoundEngine.PlaySound(Profiles[profileIndex].EquipSound, player.Center);
 					}
 				}
 			}
@@ -475,6 +514,134 @@ namespace Wprint.Content.Items
 					equipNoticeTicksRemaining--;
 				}
 			}
+
+			UpdateKnifeEquipEffect(player);
+		}
+
+		private static void PlayRollTickSound(Player player)
+		{
+			if (player.whoAmI == Main.myPlayer && Main.netMode != NetmodeID.Server)
+			{
+				SoundEngine.PlaySound(RollTickSound, player.Center);
+			}
+		}
+
+		private bool IsEquipSoundPlaying()
+		{
+			if (!equipSoundSlot.HasValue)
+			{
+				return false;
+			}
+
+			if (SoundEngine.TryGetActiveSound(equipSoundSlot.Value, out _))
+			{
+				return true;
+			}
+
+			equipSoundSlot = null;
+			return false;
+		}
+
+		private void UpdateKnifeEquipEffect(Player player)
+		{
+			if (player.whoAmI != Main.myPlayer
+				|| Main.netMode == NetmodeID.Server
+				|| profileIndex < 0
+				|| !Profiles[profileIndex].UseGoldShortswordProjectile
+				|| shotsRemaining <= 0)
+			{
+				knifeEquipEffectTicks = 0;
+				return;
+			}
+
+			int effectTick = knifeEquipEffectTicks++;
+			Vector2 center = player.Center;
+			Lighting.AddLight(center, 0.9f, 0.65f, 0.2f);
+
+			if (effectTick == 0)
+			{
+				SpawnInwardKnifeFlames(center, 96f, 24, 5f);
+			}
+			else if (effectTick < KnifeEquipInwardDurationTicks && effectTick % 3 == 0)
+			{
+				float progress = effectTick / (float)KnifeEquipInwardDurationTicks;
+				float radius = MathHelper.Lerp(88f, 28f, progress);
+				SpawnInwardKnifeFlames(center, radius, 6, 3f + progress * 2f);
+			}
+			else if (effectTick == KnifeEquipInwardDurationTicks)
+			{
+				SpawnKnifeFlameExplosion(center);
+			}
+			else if (effectTick > KnifeEquipInwardDurationTicks && effectTick % 5 == 0)
+			{
+				SpawnOutwardKnifeFlames(center, 5);
+			}
+		}
+
+		private static void SpawnInwardKnifeFlames(Vector2 center, float radius, int count, float speed)
+		{
+			for (int i = 0; i < count; i++)
+			{
+				float angle = MathHelper.TwoPi * i / count;
+				Vector2 direction = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+				Vector2 tangent = new Vector2(-direction.Y, direction.X);
+				Vector2 position = center + direction * radius;
+				Vector2 velocity = -direction * speed + tangent * 1.5f;
+				SpawnKnifeFlame(position, velocity, 1.3f);
+			}
+		}
+
+		private static void SpawnKnifeFlameExplosion(Vector2 center)
+		{
+			for (int i = 0; i < KnifeEquipExplosionParticleCount; i++)
+			{
+				float angle = MathHelper.TwoPi * i / KnifeEquipExplosionParticleCount
+					+ Main.rand.NextFloat(-0.08f, 0.08f);
+				Vector2 direction = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+				Vector2 velocity = direction * Main.rand.NextFloat(5f, 10f);
+				SpawnKnifeFlame(center + direction * 4f, velocity, Main.rand.NextFloat(1.1f, 1.7f));
+			}
+		}
+
+		private static void SpawnOutwardKnifeFlames(Vector2 center, int count)
+		{
+			for (int i = 0; i < count; i++)
+			{
+				float angle = Main.rand.NextFloat(MathHelper.TwoPi);
+				Vector2 direction = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+				Vector2 velocity = direction * Main.rand.NextFloat(2f, 6f);
+				SpawnKnifeFlame(center + direction * Main.rand.NextFloat(0f, 12f), velocity, 1.1f);
+			}
+		}
+
+		private static void SpawnKnifeFlame(Vector2 position, Vector2 velocity, float scale)
+		{
+			int dustIndex = Dust.NewDust(
+				position,
+				1,
+				1,
+				DustID.GoldFlame,
+				velocity.X,
+				velocity.Y,
+				100,
+				Color.Gold,
+				scale);
+			Dust dust = Main.dust[dustIndex];
+			dust.position = position;
+			dust.velocity = velocity;
+			dust.noGravity = true;
+		}
+
+		private int RollNextPreviewProfile()
+		{
+			int nextProfileIndex;
+			do
+			{
+				nextProfileIndex = Main.rand.Next(Profiles.Length);
+			}
+			while (nextProfileIndex == previewProfileIndex || nextProfileIndex == rollResultIndex);
+
+			return nextProfileIndex;
 		}
 
 		private static int RollProfile(int excludedProfileIndex)
@@ -536,6 +703,14 @@ namespace Wprint.Content.Items
 				? Profiles[profileIndex].SpriteItemType
 				: ItemID.Handgun;
 			return TextureAssets.Item[spriteItemType].Value;
+		}
+
+		public override void AddRecipes()
+		{
+			Recipe recipe = CreateRecipe();
+			recipe.AddIngredient(ItemID.ChestLock, 1);
+			recipe.AddTile(TileID.MythrilAnvil);
+			recipe.Register();
 		}
 	}
 }

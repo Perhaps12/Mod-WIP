@@ -34,23 +34,38 @@ namespace Wprint.Content.Items
 			}
 
 			string text;
+			string measurementText;
 			Color textColor;
 			if (gun.IsRolling)
 			{
+				string previewName = gun.RollPreviewName;
+				measurementText = Language.GetTextValue(
+					"Mods.Wprint.Items.RandomHandgun.Rolling",
+					previewName);
+				Color previewTint = gun.RollPreviewTint;
+				string coloredPreviewName =
+					$"[c/{previewTint.R:X2}{previewTint.G:X2}{previewTint.B:X2}:{previewName}]";
 				text = Language.GetTextValue(
 					"Mods.Wprint.Items.RandomHandgun.Rolling",
-					gun.RollPreviewName);
-				textColor = gun.RollPreviewTint;
+					coloredPreviewName);
+				textColor = Color.White;
 			}
 			else
 			{
+				string equippedName = gun.EquippedProfileName;
+				measurementText = Language.GetTextValue(
+					"Mods.Wprint.Items.RandomHandgun.Equipped",
+					equippedName);
+				Color equippedTint = gun.EquippedProfileTint;
+				string coloredEquippedName =
+					$"[c/{equippedTint.R:X2}{equippedTint.G:X2}{equippedTint.B:X2}:{equippedName}]";
 				text = Language.GetTextValue(
 					"Mods.Wprint.Items.RandomHandgun.Equipped",
-					gun.EquippedProfileName);
-				textColor = gun.EquippedProfileTint;
+					coloredEquippedName);
+				textColor = Color.White;
 			}
 
-			Vector2 textSize = FontAssets.MouseText.Value.MeasureString(text);
+			Vector2 textSize = FontAssets.MouseText.Value.MeasureString(measurementText);
 			Vector2 position = drawInfo.drawPlayer.Top
 				- Main.screenPosition
 				- new Vector2(textSize.X * 0.5f, 34f);
