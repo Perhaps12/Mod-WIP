@@ -12,7 +12,7 @@ namespace Wprint.Content.Projectiles
 	// Excalibur slash (projectile 982), draws that slash sprite in grey with the Nail swinging
 	// along its leading edge, and hits whatever is inside the slash cone.
 	//   velocity = aim direction rotated 90 degrees by the sweep (see Nail.Shoot)
-	//   ai[0]    = 1 for a down-slash (pogo)
+	//   ai[0]    = 1 for a down-slash
 	//   ai[1]    = sweep direction (+1 clockwise, -1 counter-clockwise)
 	//   ai[2]    = item scale
 	public class NailSlash : ModProjectile
@@ -115,15 +115,19 @@ namespace Wprint.Content.Projectiles
 			return false; // we did the drawing ourselves
 		}
 
-		// Pogo: bounce upward when a down-slash hits an enemy
+		// Pogo on any hit, with a stronger bounce for downward attacks.
 		public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
 		{
-			if (Projectile.ai[0] == 1)
+			Player owner = Main.player[Projectile.owner];
+			Vector2 attackDirection = Projectile.velocity.RotatedBy(-Projectile.ai[1] * MathHelper.PiOver2);
+			if (attackDirection.Y < -0.5f)
 			{
-				Player owner = Main.player[Projectile.owner];
-				owner.velocity.Y = -8f;
-				owner.fallStart = (int)(owner.position.Y / 16f); // reset fall damage
+				return;
 			}
+
+			float bounceSpeed = attackDirection.Y > 0.5f ? 8f : 2f;
+			owner.velocity = -attackDirection * bounceSpeed;
+			owner.fallStart = (int)(owner.position.Y / 16f); // reset fall damage
 		}
 	}
 }
