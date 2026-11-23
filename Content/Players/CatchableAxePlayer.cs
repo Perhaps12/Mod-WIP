@@ -12,7 +12,7 @@ namespace Wprint.Content.Players
 		// The axe's reward caps at ten catches and expires after five seconds.
 		public const int MaxStacks = 10;
 		public const int StackDurationTicks = 5 * 60;
-		public const int MaxStackSpeedBuffDurationTicks = 2 * 60;
+		public const int MaxStackSpeedBuffDurationTicks = 1 * 60;
 
 		public int Stacks { get; private set; }
 

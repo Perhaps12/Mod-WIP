@@ -1,5 +1,7 @@
 using System;
+using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.Audio;
@@ -10,11 +12,26 @@ namespace Wprint.Content.Items
 	// Thrown axe behavior: bounce from NPCs and let its owner catch it by touching it.
 	public class catchableaxeProjectile : ModProjectile
 	{
+		private const float NormalGravity = 0.19f;
+		private const float BouncedFallGravity = 0.7f;
+		private const float HorizontalDrag = 0.99f;
+		private const float BounceVerticalSpeed = 8f;
+		private const float MinimumBounceVerticalSpeed = 2f;
+		private const float MovementPredictionAccuracy = 0.5f;
+		private const float PlayerMomentumBoost = 0.65f;
+		private const float LandingErrorRange = 140f;
+		private static readonly int BounceFlightTicks = (int)Math.Ceiling(
+			BounceVerticalSpeed / NormalGravity
+			+ BounceVerticalSpeed / Math.Sqrt(NormalGravity * BouncedFallGravity));
+		private static readonly float HorizontalTravelFactor = HorizontalDrag
+			* (1f - (float)Math.Pow(HorizontalDrag, BounceFlightTicks))
+			/ (1f - HorizontalDrag);
+
 		public override void SetDefaults()
         {
             // Set the projectile's size, damage type, hit limit, lifetime, and collision behavior.
-            Projectile.width = 70;
-            Projectile.height = 70;
+            Projectile.width = 75;
+            Projectile.height = 75;
             Projectile.friendly = true;
             Projectile.hostile = false;
             Projectile.DamageType = DamageClass.Ranged;
@@ -22,6 +39,22 @@ namespace Wprint.Content.Items
             Projectile.timeLeft = 600;
             Projectile.tileCollide = true;
             Projectile.ignoreWater = true;
+        }
+
+        public override void OnSpawn(IEntitySource source)
+        {
+            if (Projectile.owner == Main.myPlayer)
+            {
+                Projectile.ai[1] = Main.rand.Next(2) == 0 ? -1f : 1f;
+                Projectile.netUpdate = true;
+            }
+        }
+
+        public override Color? GetAlpha(Color lightColor)
+        {
+            return Projectile.ai[0] == 1f
+                ? Color.Lerp(lightColor, Color.Gold, 0.65f)
+                : null;
         }
 
         public override void AI()
@@ -53,7 +86,7 @@ namespace Wprint.Content.Items
             }
 
             // Each stack makes the axe spin faster while it is moving.
-            Projectile.rotation += (0.4f + stacks * 0.05f) * Projectile.direction;
+            Projectile.rotation += (0.5f + stacks * 0.06f) * Projectile.direction * Projectile.ai[1];
 
             // ai[0] is set after an NPC hit, so the axe can only be caught after bouncing.
             if (Projectile.ai[0] == 1f && owner.active && !owner.dead && owner.Hitbox.Intersects(Projectile.Hitbox))
@@ -68,9 +101,12 @@ namespace Wprint.Content.Items
                 return;
             }
 
-            // Gravity pulls the axe down and horizontal drag gradually slows it.
-            Projectile.velocity.Y += 0.19f;
-            Projectile.velocity.X *= 0.99f;
+            // Increase gravity only while a bounced axe is descending, keeping its upward arc unchanged.
+            float gravity = Projectile.ai[0] == 1f && Projectile.velocity.Y >= 0f
+                ? BouncedFallGravity
+                : NormalGravity;
+            Projectile.velocity.Y += gravity;
+            Projectile.velocity.X *= HorizontalDrag;
         }
 
         public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
@@ -82,28 +118,27 @@ namespace Wprint.Content.Items
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
-            // At maximum stacks, hits also give the target Bleeding.
+            // At maximum stacks, hits also give the target OnFire.
             if (Main.player[Projectile.owner].GetModPlayer<CatchableAxePlayer>().Stacks >= CatchableAxePlayer.MaxStacks)
             {
-                target.AddBuff(BuffID.Bleeding, 300);
+                target.AddBuff(BuffID.OnFire, 300);
             }
 
-            SoundEngine.PlaySound(SoundID.Item174, Projectile.position); 
+            //SoundEngine.PlaySound(SoundID.Item174, Projectile.position);
 
-            // The owner chooses the random bounce; netUpdate shares it with other players.
+            // The owner underpredicts movement and adds a small landing error to make catches less automatic.
             if (Main.myPlayer == Projectile.owner)
             {
-                // Reverse horizontal travel, but choose a random side if the hit was nearly vertical.
-                float incomingX = Projectile.velocity.X;
-                float horizontalDirection = Math.Abs(incomingX) < 1f
-                    ? (Main.rand.NextBool() ? -1f : 1f)
-                    : (incomingX > 0f ? -1f : 1f);
-                // Vary horizontal speed from 20% to 70% of the incoming speed.
-                float horizontalSpeed = Math.Max(Math.Abs(incomingX), 3f) * Main.rand.NextFloat(0.2f, 0.7f);
-                Projectile.velocity.X = horizontalDirection * horizontalSpeed;
-
-                // Randomize the upward speed to vary the bounce height and landing point.
-                Projectile.velocity.Y = -Main.rand.NextFloat(4f, 14f);
+                Player owner = Main.player[Projectile.owner];
+                float predictedPlayerX = owner.Center.X
+                    + owner.velocity.X * BounceFlightTicks * MovementPredictionAccuracy
+                    + Main.rand.NextFloat(-LandingErrorRange, LandingErrorRange);
+                float predictedPlayerY = owner.Center.Y
+                    + owner.velocity.Y * BounceFlightTicks * MovementPredictionAccuracy
+                    + Main.rand.NextFloat(-LandingErrorRange, LandingErrorRange);
+                Projectile.velocity.X = (predictedPlayerX - Projectile.Center.X) / HorizontalTravelFactor
+                    + owner.velocity.X * PlayerMomentumBoost;
+                Projectile.velocity.Y = GetBounceVerticalVelocity(predictedPlayerY - Projectile.Center.Y);
                 Projectile.ai[0] = 1f;
 
                 // Keep the axe catchable, but prevent it from hurting any more NPCs.
@@ -111,6 +146,33 @@ namespace Wprint.Content.Items
                 Projectile.damage = 0;
                 Projectile.netUpdate = true;
             }
+        }
+
+        private static float GetBounceVerticalVelocity(float targetDisplacement)
+        {
+            float low = MinimumBounceVerticalSpeed;
+            float high = NormalGravity * BounceFlightTicks * 0.98f;
+
+            for (int i = 0; i < 24; i++)
+            {
+                float upwardSpeed = (low + high) * 0.5f;
+                float ascentTicks = upwardSpeed / NormalGravity;
+                float descentTicks = BounceFlightTicks - ascentTicks;
+                float verticalDisplacement =
+                    -0.5f * upwardSpeed * ascentTicks
+                    + 0.5f * BouncedFallGravity * descentTicks * descentTicks;
+
+                if (verticalDisplacement > targetDisplacement)
+                {
+                    low = upwardSpeed;
+                }
+                else
+                {
+                    high = upwardSpeed;
+                }
+            }
+
+            return -(low + high) * 0.5f;
         }
 	}
 }
