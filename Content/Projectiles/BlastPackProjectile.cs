@@ -12,14 +12,14 @@ namespace Wprint.Content.Projectiles
 	// The thrown Blast Pack. Spawned by Content/Items/BlastPack.cs.
 	//
 	//   Flying   - arcs with gravity
-	//   Stuck    - sticks to the first tile it touches (falls again if that tile is removed)
+	//   Stuck    - sticks to the first tile it touches, platforms included (falls again if that tile is removed)
 	//   Exploding- after the fuse, on enemy contact, or on right click: the hitbox grows for
 	//              3 ticks to damage enemies, then it dies and launches its owner away from it.
 	public class BlastPackProjectile : ModProjectile
 	{
 		const int FuseTicks = 180;             // 3 seconds, same as a Sticky Grenade
 		const int BlowTicks = 3;               // last ticks of life where the explosion does damage
-		const int ExplosionSize = 336;         // px, width/height of the damaging blast (21 tiles)
+		const int ExplosionSize = 200;         // px, width/height of the damaging blast (21 tiles)
 		const float LaunchRampRadius = 8 * 16f; // launch strength ramps from Near to Far over the first 8 tiles
 		const float LaunchRadius = 12 * 16f;   // ...then stays at Far out to 12 tiles; beyond that, no launch
 		const float LaunchSpeedNear = 2f;      // px per tick at point-blank
@@ -107,7 +107,7 @@ namespace Wprint.Content.Projectiles
 				Projectile.velocity = Vector2.Zero;
 
 				// The tile it was stuck to got mined: fall again
-				if (!Collision.SolidCollision(Projectile.position - new Vector2(2), Projectile.width + 4, Projectile.height + 4))
+				if (!TouchingStickableTile())
 					Stuck = false;
 			}
 			else
@@ -129,6 +129,34 @@ namespace Wprint.Content.Projectiles
 			Projectile.velocity = Vector2.Zero;
 			Projectile.alpha = 255;
 			Projectile.Resize(ExplosionSize, ExplosionSize);   // keeps the center in place
+		}
+
+		// Land on platforms instead of falling through them
+		public override bool TileCollideStyle(ref int width, ref int height, ref bool fallThrough, ref Vector2 hitboxCenterFrac)
+		{
+			fallThrough = false;
+			return true;
+		}
+
+		// Any solid block or solid-top tile (platforms of any style) within 2 px of the pack
+		bool TouchingStickableTile()
+		{
+			int left = (int)((Projectile.position.X - 2f) / 16f);
+			int right = (int)((Projectile.position.X + Projectile.width + 2f) / 16f);
+			int top = (int)((Projectile.position.Y - 2f) / 16f);
+			int bottom = (int)((Projectile.position.Y + Projectile.height + 2f) / 16f);
+			for (int x = left; x <= right; x++)
+			{
+				for (int y = top; y <= bottom; y++)
+				{
+					if (!WorldGen.InWorld(x, y))
+						continue;
+					Tile tile = Main.tile[x, y];
+					if (tile.HasUnactuatedTile && (Main.tileSolid[tile.TileType] || Main.tileSolidTop[tile.TileType]))
+						return true;
+				}
+			}
+			return false;
 		}
 
 		public override bool OnTileCollide(Vector2 oldVelocity)

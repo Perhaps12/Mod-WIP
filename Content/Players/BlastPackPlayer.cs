@@ -35,8 +35,7 @@ namespace Wprint.Content.Players
 				return;
 
 			// Landed: end the effect (skip the first few ticks, when you're still leaving the ground)
-			bool onGround = Player.velocity.Y == 0f &&
-				Collision.SolidCollision(Player.BottomLeft, Player.width, 1, true);
+			bool onGround = ClawlinePlayer.IsOnGround(Player); // counts platforms of any style
 			if (onGround && lowGravityTimer < LowGravityTotalTicks - 5)
 			{
 				lowGravityTimer = 0;
