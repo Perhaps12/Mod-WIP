@@ -15,7 +15,9 @@ namespace Wprint
 	internal enum WprintPacketType : byte
 	{
 		CatchableAxeCaught,
-		SyncCatchableAxeState
+		SyncCatchableAxeState,
+		LaevateinnChargeState,
+		LaevateinnResetCharge
 	}
 
 	// Please read https://github.com/tModLoader/tModLoader/wiki/Basic-tModLoader-Modding-Guide#mod-skeleton-contents for more information about the various files in a mod.
@@ -66,6 +68,30 @@ namespace Wprint
 					// Clients apply the stack count sent by the server.
 					Main.player[playerIndex].GetModPlayer<CatchableAxePlayer>().SetSyncedState(stacks);
 				}
+			}
+			else if (packetType == WprintPacketType.LaevateinnChargeState)
+			{
+				int playerIndex = reader.ReadByte();
+				int chargeTicks = reader.ReadInt32();
+				bool powerFrozen = reader.ReadBoolean();
+				if (Main.netMode == NetmodeID.MultiplayerClient
+					&& playerIndex < Main.maxPlayers
+					&& chargeTicks >= 0)
+				{
+					Main.player[playerIndex].GetModPlayer<LaevateinnPlayer>().SetChargeState(chargeTicks, powerFrozen);
+				}
+			}
+			else if (packetType == WprintPacketType.LaevateinnResetCharge)
+			{
+				int playerIndex = reader.ReadByte();
+				if (Main.netMode != NetmodeID.Server || whoAmI != playerIndex || playerIndex >= Main.maxPlayers)
+				{
+					return;
+				}
+
+				LaevateinnPlayer laevateinnPlayer = Main.player[playerIndex].GetModPlayer<LaevateinnPlayer>();
+				laevateinnPlayer.ResetCharge();
+				laevateinnPlayer.SendChargeState(-1, whoAmI);
 			}
 		}
 	}

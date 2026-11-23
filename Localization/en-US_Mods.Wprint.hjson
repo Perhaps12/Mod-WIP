@@ -13,7 +13,7 @@ Items: {
 	}
 
 	catchableaxe: {
-		DisplayName: catchableaxe
+		DisplayName: Champion's Axe
 		Tooltip: ""
 	}
 
@@ -35,6 +35,19 @@ Items: {
 			Right click to detonate all of your Blast Packs
 			'''
 	}
+
+	Laevateinn: {
+		DisplayName: Lævateinn
+		Tooltip:
+			'''
+			Click left to swing toward the cursor; each swing costs 10 more life than the previous one
+			Damage and burn damage double every 4 seconds of accumulated swing time
+			Burns enemies for 1 damage per second for 3 seconds
+			Life cost and power stop increasing at 1 life; charge persists until you right click
+			Right click to stab and detonate an enemy's remaining burn, healing you for damage dealt
+			The stab resets charge even if it misses
+			'''
+	}
 }
 
 Projectiles: {
@@ -42,11 +55,14 @@ Projectiles: {
 	NailSlash.DisplayName: Nail Slash
 	ClawlineHook.DisplayName: Clawline Hook
 	BlastPackProjectile.DisplayName: Blast Pack
+	LaevateinnHoldProjectile.DisplayName: Laevateinn Hold Projectile
+	LaevateinnStabProjectile.DisplayName: Laevateinn Stab Projectile
+	LaevateinnSwingProjectile.DisplayName: Laevateinn Swing Projectile
 }
 
 Buffs: {
 	CatchableAxeBuff: {
-		DisplayName: Axe Catch
+		DisplayName: Spinning Axe
 		Description:
 			'''
 			Stacks: {0}/10
@@ -57,7 +73,12 @@ Buffs: {
 	}
 
 	CatchableAxeSpeedBuff: {
-		DisplayName: Axe Rush
+		DisplayName: Blood Rush
 		Description: Catching the axe at maximum stacks briefly increases movement speed
+	}
+
+	LaevateinnBurnBuff: {
+		DisplayName: Laevateinn Burn
+		Description: Burning damage increases with Laevateinn's charge
 	}
 }
