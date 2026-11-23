@@ -71,7 +71,7 @@ namespace Wprint.Content.Items
 			float scale = player.GetAdjustedItemScale(Item);
 
 			// The slash (hitbox + grey Excalibur-style visual + swinging sword);
-			// ai[0] = 1 marks a down-slash (pogo), ai[1] = sweep direction, ai[2] = scale
+			// ai[0] = 1 marks a down-slash, ai[1] = sweep direction, ai[2] = scale
 			Projectile.NewProjectile(source, player.MountedCenter, slashVelocity, type, damage, knockback,
 				player.whoAmI, dir.Y > 0 ? 1 : 0, sweep, scale);
 			return false; // we spawned the projectile ourselves
