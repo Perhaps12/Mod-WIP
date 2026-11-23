@@ -92,12 +92,12 @@ namespace Wprint.Content.Items
 		// 37 23 20 17 3 are the weights.
 		{
 			new GunProfile(
-				nameKey: "Glock", weight: 30, damage: 33, critChance: 0, useTime: 13, magazineSize: 10,
+				nameKey: "Glock", weight: 30, damage: 32, critChance: 0, useTime: 13, magazineSize: 10,
 				knockback: 3f, useSound: new SoundStyle("Wprint/Sounds/GlockShot"), equipSound: new SoundStyle("Wprint/Sounds/GlockEquip"), shootSpeed: 12f,
 				inaccuracyDegrees: 0f, projectileTypeOverride: null, useGoldShortswordProjectile: false,
 				usesBulletAmmo: true, spriteItemType: ItemID.Handgun, tint: new Color(75, 105, 255)),
 			new GunProfile(
-				nameKey: "UMP", weight: 25, damage: 27, critChance: 7, useTime: 4, magazineSize: 24,
+				nameKey: "UMP", weight: 25, damage: 28, critChance: 8, useTime: 4, magazineSize: 24,
 				knockback: 2f, useSound: new SoundStyle("Wprint/Sounds/UMPShot"), equipSound: new SoundStyle("Wprint/Sounds/UMPEquip"), shootSpeed: 12f,
 				inaccuracyDegrees: 8f, projectileTypeOverride: null, useGoldShortswordProjectile: false,
 				usesBulletAmmo: true, spriteItemType: ItemID.Uzi, tint: new Color(136, 71, 255)),
@@ -107,7 +107,7 @@ namespace Wprint.Content.Items
 				inaccuracyDegrees: 0f, projectileTypeOverride: ProjectileID.BulletHighVelocity,
 				useGoldShortswordProjectile: false, usesBulletAmmo: true, spriteItemType: ItemID.Musket, tint: new Color(211, 44, 230)),
 			new GunProfile(
-				nameKey: "AK-47", weight: 19, damage: 99, critChance: 2, useTime: 7, magazineSize: 20,
+				nameKey: "AK-47", weight: 19, damage: 101, critChance: 2, useTime: 7, magazineSize: 20,
 				knockback: 4f, useSound: new SoundStyle("Wprint/Sounds/AK47Shot"), equipSound: new SoundStyle("Wprint/Sounds/AK47Equip"), shootSpeed: 18f,
 				inaccuracyDegrees: 2f, projectileTypeOverride: null, useGoldShortswordProjectile: false,
 				usesBulletAmmo: true, spriteItemType: ItemID.ClockworkAssaultRifle, tint: new Color(235, 75, 75)),
@@ -249,6 +249,7 @@ namespace Wprint.Content.Items
 
 		public override void SaveData(TagCompound tag)
 		{
+			tag["randomHandgunPrefix"] = Item.prefix;
 			tag["profileIndex"] = profileIndex;
 			tag["shotsRemaining"] = shotsRemaining;
 			tag["rollTicksRemaining"] = rollTicksRemaining;
@@ -261,6 +262,11 @@ namespace Wprint.Content.Items
 
 		public override void LoadData(TagCompound tag)
 		{
+			if (tag.ContainsKey("randomHandgunPrefix"))
+			{
+				Item.prefix = tag.GetInt("randomHandgunPrefix");
+			}
+
 			profileIndex = tag.GetInt("profileIndex");
 			shotsRemaining = tag.GetInt("shotsRemaining");
 			rollTicksRemaining = tag.ContainsKey("rollTicksRemaining") ? tag.GetInt("rollTicksRemaining") : 0;
