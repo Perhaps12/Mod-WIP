@@ -19,7 +19,7 @@ namespace Wprint.Content.Projectiles
 	//                If the enemy dies, the hook stays where it was and still pulls (no bounce).
 	public class ClawlineHook : ModProjectile
 	{
-		const float MaxRange = 20 * 16f;   // 20 tiles
+		const float MaxRange = 25 * 16f;   // 20 tiles
 		const int LatchDelayTicks = 6;     // pause after landing before the pull starts
 		const int MissHoverTicks = 6;     // how long the hook floats at max range before pulling
 		const float PullSpeed = 22f;       // px per tick while being pulled
@@ -27,6 +27,7 @@ namespace Wprint.Content.Projectiles
 		const float BounceHorizontalSpeed = 6f; // px per tick pushed back away from the enemy
 		const float BounceUpSpeed = 9f;         // px per tick launched upward off the enemy
 		const int MaxPullTicks = 60;       // safety timeout
+		const int EnemyHitboxPadding = 16; // px added on every side of the enemy hitbox (16x16 -> 48x48)
 
 		enum State { Flying, Latched, Pulling }
 
@@ -107,6 +108,13 @@ namespace Wprint.Content.Projectiles
 
 		// Only damages while flying out
 		public override bool? CanDamage() => CurrentState == State.Flying ? null : false;
+
+		// Bigger hitbox against enemies only, so they're easier to hook. Tile collision still
+		// uses the small 16x16 box, so the hook doesn't snag on walls it would have passed.
+		public override void ModifyDamageHitbox(ref Rectangle hitbox)
+		{
+			hitbox.Inflate(EnemyHitboxPadding, EnemyHitboxPadding);
+		}
 
 		public override void AI()
 		{

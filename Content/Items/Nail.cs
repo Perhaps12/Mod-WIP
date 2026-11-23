@@ -9,16 +9,14 @@ using Wprint.Content.Projectiles;
 namespace Wprint.Content.Items
 {
 	// A Hollow Knight-style nail: swings toward the mouse, snapped to up/down/left/right
-	// (down only while airborne). Uses the Arkhalis slash animation.
+	// (down only while airborne). Uses the vanilla Excalibur slash visual.
 	public class Nail : ModItem
 	{
-		private int swingVariant; // toggles 0/1 each swing to alternate slash animations
-
 		public override void SetDefaults()
 		{
 			Item.width = 32;
 			Item.height = 32;
-			Item.damage = 20;
+			Item.damage = 40;
 			Item.DamageType = DamageClass.Melee;
 			Item.useTime = 20;
 			Item.useAnimation = 20;
@@ -54,11 +52,28 @@ namespace Wprint.Content.Items
 				dir = new Vector2(toMouse.X >= 0 ? 1 : -1, 0);             // mouse to the side
 			}
 
-			// velocity carries the direction; ai[0] = 1 marks a down-slash (used for pogo);
-			// ai[1] alternates which half of the Arkhalis animation plays, for a combo feel
-			swingVariant = 1 - swingVariant;
-			Projectile.NewProjectile(source, player.Center, dir, type, damage, knockback,
-				player.whoAmI, dir.Y > 0 ? 1 : 0, swingVariant);
+			// Sweep direction (+1 = clockwise on screen), randomly picked each swing:
+			//   side swing:      top -> bottom, or bottom -> top
+			//   up/down-slash:   back -> front, or front -> back
+			float sweep;
+			if (dir.X != 0)
+				sweep = dir.X * player.gravDir;
+			else if (dir.Y < 0)
+				sweep = player.direction;
+			else
+				sweep = -player.direction;
+			if (Main.rand.NextBool())
+				sweep = -sweep;
+
+			// Vanilla's slash sweeps 180 degrees starting at (velocity angle + sweep * 180).
+			// Rotating the velocity by sweep * 90 centers that sweep on the aim direction.
+			Vector2 slashVelocity = dir.RotatedBy(sweep * MathHelper.PiOver2);
+			float scale = player.GetAdjustedItemScale(Item);
+
+			// The slash (hitbox + grey Excalibur-style visual + swinging sword);
+			// ai[0] = 1 marks a down-slash (pogo), ai[1] = sweep direction, ai[2] = scale
+			Projectile.NewProjectile(source, player.MountedCenter, slashVelocity, type, damage, knockback,
+				player.whoAmI, dir.Y > 0 ? 1 : 0, sweep, scale);
 			return false; // we spawned the projectile ourselves
 		}
 

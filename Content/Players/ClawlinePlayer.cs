@@ -23,9 +23,28 @@ namespace Wprint.Content.Players
 
 		// Standing on solid ground or a platform (not just "vertical speed is 0", which is also
 		// true while the Clawline holds the player still in midair)
-		public bool OnGround =>
-			Player.velocity.Y == 0f &&
-			Collision.SolidCollision(Player.BottomLeft, Player.width, 1, true);
+		public bool OnGround => IsOnGround(Player);
+
+		// Shared with other items (e.g. the Blast Pack)
+		public static bool IsOnGround(Player player) => player.velocity.Y == 0f && StandingOnTile(player);
+
+		// Checks the row of tiles just below the player's feet for anything standable:
+		// solid blocks or solid-top tiles (platforms, tables, etc. of any style)
+		static bool StandingOnTile(Player player)
+		{
+			int y = (int)((player.Bottom.Y + 2f) / 16f);
+			int left = (int)(player.position.X / 16f);
+			int right = (int)((player.position.X + player.width - 1f) / 16f);
+			for (int x = left; x <= right; x++)
+			{
+				if (!WorldGen.InWorld(x, y))
+					continue;
+				Tile tile = Main.tile[x, y];
+				if (tile.HasUnactuatedTile && (Main.tileSolid[tile.TileType] || Main.tileSolidTop[tile.TileType]))
+					return true;
+			}
+			return false;
+		}
 
 		// Checked by both the item (hotbar use) and the hook (Grapple key)
 		public bool CanUseClawline() => !HookOut && (OnGround || AirCharges > 0);
