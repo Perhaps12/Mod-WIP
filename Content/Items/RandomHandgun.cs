@@ -92,27 +92,27 @@ namespace Wprint.Content.Items
 		// 37 23 20 17 3 are the weights.
 		{
 			new GunProfile(
-				nameKey: "Glock", weight: 37, damage: 31, critChance: 8, useTime: 13, magazineSize: 10,
+				nameKey: "Glock", weight: 30, damage: 33, critChance: 0, useTime: 13, magazineSize: 10,
 				knockback: 3f, useSound: new SoundStyle("Wprint/Sounds/GlockShot"), equipSound: new SoundStyle("Wprint/Sounds/GlockEquip"), shootSpeed: 12f,
 				inaccuracyDegrees: 0f, projectileTypeOverride: null, useGoldShortswordProjectile: false,
 				usesBulletAmmo: true, spriteItemType: ItemID.Handgun, tint: new Color(75, 105, 255)),
 			new GunProfile(
-				nameKey: "UMP", weight: 23, damage: 22, critChance: 7, useTime: 4, magazineSize: 25,
+				nameKey: "UMP", weight: 25, damage: 27, critChance: 7, useTime: 4, magazineSize: 24,
 				knockback: 2f, useSound: new SoundStyle("Wprint/Sounds/UMPShot"), equipSound: new SoundStyle("Wprint/Sounds/UMPEquip"), shootSpeed: 12f,
 				inaccuracyDegrees: 8f, projectileTypeOverride: null, useGoldShortswordProjectile: false,
 				usesBulletAmmo: true, spriteItemType: ItemID.Uzi, tint: new Color(136, 71, 255)),
 			new GunProfile(
-				nameKey: "AWP", weight: 21, damage: 400, critChance: 40, useTime: 90, magazineSize: 3,
+				nameKey: "AWP", weight: 23, damage: 460, critChance: 40, useTime: 90, magazineSize: 3,
 				knockback: 10f, useSound: new SoundStyle("Wprint/Sounds/AWPShot"), equipSound: new SoundStyle("Wprint/Sounds/AWPEquip"), shootSpeed: 100f,
 				inaccuracyDegrees: 0f, projectileTypeOverride: ProjectileID.BulletHighVelocity,
 				useGoldShortswordProjectile: false, usesBulletAmmo: true, spriteItemType: ItemID.Musket, tint: new Color(211, 44, 230)),
 			new GunProfile(
-				nameKey: "AK-47", weight: 16, damage: 47, critChance: 8, useTime: 7, magazineSize: 20,
+				nameKey: "AK-47", weight: 19, damage: 99, critChance: 2, useTime: 7, magazineSize: 20,
 				knockback: 4f, useSound: new SoundStyle("Wprint/Sounds/AK47Shot"), equipSound: new SoundStyle("Wprint/Sounds/AK47Equip"), shootSpeed: 18f,
 				inaccuracyDegrees: 2f, projectileTypeOverride: null, useGoldShortswordProjectile: false,
 				usesBulletAmmo: true, spriteItemType: ItemID.ClockworkAssaultRifle, tint: new Color(235, 75, 75)),
 			new GunProfile(
-				nameKey: "Knife", weight: 1003, damage: 2000, critChance: 0, useTime: 5, magazineSize: 1,
+				nameKey: "Knife", weight: 3, damage: 2500, critChance: 0, useTime: 5, magazineSize: 1,
 				knockback: 20f, useSound: SoundID.Item11, equipSound: new SoundStyle("Wprint/Sounds/KnifeEquip"), shootSpeed: 30f,
 				inaccuracyDegrees: 0f, projectileTypeOverride: null, useGoldShortswordProjectile: true,
 				usesBulletAmmo: false, spriteItemType: ItemID.Handgun, tint: new Color(228, 174, 51))
@@ -166,7 +166,6 @@ namespace Wprint.Content.Items
 				SelectProfile();
 			}
 
-			ApplyProfile();
 			return true;
 		}
 
@@ -382,15 +381,15 @@ namespace Wprint.Content.Items
 		{
 			Color tint = profileIndex >= 0 ? Profiles[profileIndex].Tint : Color.White;
 			Color color = Color.Lerp(drawColor, tint, 0.45f);
-			Texture2D texture = GetProfileTexture();
-			float textureScale = scale * Math.Min(1f, 32f / Math.Max(texture.Width, texture.Height));
+			Main.GetItemDrawFrame(GetProfileSpriteItemType(), out Texture2D texture, out Rectangle spriteFrame);
+			float textureScale = scale * Math.Min(1f, 32f / Math.Max(spriteFrame.Width, spriteFrame.Height));
 			spriteBatch.Draw(
 				texture,
 				position,
-				null,
+				spriteFrame,
 				color,
 				0f,
-				texture.Size() / 2f,
+				spriteFrame.Size() / 2f,
 				textureScale,
 				SpriteEffects.None,
 				0f);
@@ -410,15 +409,16 @@ namespace Wprint.Content.Items
 				return false;
 			}
 
-			Texture2D texture = GetProfileTexture();
+			int spriteItemType = GetProfileSpriteItemType();
+			Main.GetItemDrawFrame(spriteItemType, out Texture2D texture, out Rectangle frame);
 			drawData.texture = texture;
-			drawData.sourceRect = null;
+			drawData.sourceRect = frame;
 
 			if (itemColorDrawData.HasValue)
 			{
 				DrawData itemColorData = itemColorDrawData.Value;
 				itemColorData.texture = texture;
-				itemColorData.sourceRect = null;
+				itemColorData.sourceRect = frame;
 				itemColorDrawData = itemColorData;
 			}
 
@@ -687,22 +687,58 @@ namespace Wprint.Content.Items
 
 		private void ApplyProfile(GunProfile profile)
 		{
+			int prefix = Item.prefix;
 			Item.damage = profile.Damage;
 			Item.crit = profile.CritChance;
 			Item.useTime = profile.UseTime;
 			Item.useAnimation = profile.UseTime;
 			Item.knockBack = profile.Knockback;
+			Item.value = Item.buyPrice(gold: 1);
+			Item.scale = 1f;
 			Item.UseSound = profile.UseSound;
 			Item.shootSpeed = profile.ShootSpeed;
 			Item.useAmmo = profile.UsesBulletAmmo ? AmmoID.Bullet : AmmoID.None;
+
+			if (prefix > 0)
+			{
+				ApplyPrefixModifiers(prefix, profile);
+			}
 		}
 
-		private Texture2D GetProfileTexture()
+		private void ApplyPrefixModifiers(int prefix, GunProfile profile)
 		{
-			int spriteItemType = profileIndex >= 0
+			const int ReferenceStat = 100;
+			Item prefixTemplate = Item.Clone();
+			prefixTemplate.prefix = 0;
+			prefixTemplate.damage = ReferenceStat;
+			prefixTemplate.crit = ReferenceStat;
+			prefixTemplate.useTime = ReferenceStat;
+			prefixTemplate.useAnimation = ReferenceStat;
+			prefixTemplate.knockBack = ReferenceStat;
+			prefixTemplate.shootSpeed = ReferenceStat;
+			prefixTemplate.scale = 1f;
+			prefixTemplate.value = Item.buyPrice(gold: 1);
+
+			if (!prefixTemplate.Prefix(prefix))
+			{
+				throw new InvalidOperationException($"Could not reapply prefix {prefix} to the random handgun profile.");
+			}
+
+			Item.damage = Math.Max(1, (int)(profile.Damage * (prefixTemplate.damage / (float)ReferenceStat)));
+			Item.crit = profile.CritChance + prefixTemplate.crit - ReferenceStat;
+			Item.useTime = Math.Max(1, (int)(profile.UseTime * (prefixTemplate.useTime / (float)ReferenceStat)));
+			Item.useAnimation = Math.Max(1, (int)(profile.UseTime * (prefixTemplate.useAnimation / (float)ReferenceStat)));
+			Item.knockBack = profile.Knockback * (prefixTemplate.knockBack / ReferenceStat);
+			Item.shootSpeed = profile.ShootSpeed * (prefixTemplate.shootSpeed / ReferenceStat);
+			Item.scale = prefixTemplate.scale;
+			Item.value = prefixTemplate.value;
+		}
+
+		private int GetProfileSpriteItemType()
+		{
+			return profileIndex >= 0
 				? Profiles[profileIndex].SpriteItemType
 				: ItemID.Handgun;
-			return TextureAssets.Item[spriteItemType].Value;
 		}
 
 		public override void AddRecipes()
