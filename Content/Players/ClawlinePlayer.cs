@@ -49,14 +49,15 @@ namespace Wprint.Content.Players
 		// Checked by both the item (hotbar use) and the hook (Grapple key)
 		public bool CanUseClawline() => !HookOut && (OnGround || AirCharges > 0);
 
-		// Called by the hook when it spawns
-		public void ConsumeChargeIfAirborne()
+		// Called by the hook when it spawns. Firing from the ground uses the charge too, so the
+		// pull can't lift you off the ground with a free air use still in hand.
+		public void ConsumeCharge()
 		{
-			if (!OnGround && AirCharges > 0)
+			if (AirCharges > 0)
 				AirCharges--;
 		}
 
-		// Called by the hook when it latches onto a tile or an enemy
+		// Called by the hook after a pull that latched onto a tile or an enemy
 		public void Recharge()
 		{
 			AirCharges = MaxAirCharges;
@@ -77,7 +78,7 @@ namespace Wprint.Content.Players
 
 		public override void PostUpdate()
 		{
-			// Touching the ground recharges the air uses
+			// Touching the ground recharges the air uses (only once the hook is gone, i.e. after the pull)
 			if (!HookOut && OnGround)
 				AirCharges = MaxAirCharges;
 		}
