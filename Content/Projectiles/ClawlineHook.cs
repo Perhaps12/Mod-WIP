@@ -60,6 +60,9 @@ namespace Wprint.Content.Projectiles
 			set { Projectile.localAI[1] = value.X; Projectile.localAI[2] = value.Y; }
 		}
 
+		// Set when the hook latches onto a tile or enemy; the air use is refilled once the pull ends
+		bool latchedOntoSomething;
+
 		// Temporary sprite: reuse the sample sword
 		public override string Texture => "Wprint/Content/Items/sample";
 
@@ -80,7 +83,7 @@ namespace Wprint.Content.Projectiles
 		public override void OnSpawn(IEntitySource source)
 		{
 			if (Projectile.owner == Main.myPlayer)
-				Main.player[Projectile.owner].GetModPlayer<ClawlinePlayer>().ConsumeChargeIfAirborne();
+				Main.player[Projectile.owner].GetModPlayer<ClawlinePlayer>().ConsumeCharge();
 
 			// Vanilla's grapple key spawns hooks with 0 damage, so pull the damage from the item ourselves
 			if (Projectile.damage <= 0 && source is EntitySource_ItemUse itemSource && itemSource.Item != null)
@@ -229,6 +232,10 @@ namespace Wprint.Content.Projectiles
 					// hook, which can point almost anywhere once the player is this close.
 					clawPlayer.ForcedVelocity = stuck ? owner.velocity : ReleaseDirection * PullSpeed * ReleaseSpeedMultiplier;
 				}
+
+				// Pull finished: hooking a wall or enemy refills the air use now, not when it latched
+				if (latchedOntoSomething)
+					RechargeOwner();
 				Projectile.Kill();
 				return;
 			}
@@ -243,7 +250,7 @@ namespace Wprint.Content.Projectiles
 				Projectile.tileCollide = false;
 				Projectile.velocity = Vector2.Zero;
 				CurrentState = State.Latched;
-				RechargeOwner(); // grabbing a wall refills air uses
+				latchedOntoSomething = true; // grabbing a wall refills air uses (after the pull)
 			}
 			return false; // don't die on tile hit
 		}
@@ -256,7 +263,7 @@ namespace Wprint.Content.Projectiles
 				Projectile.tileCollide = false;
 				Projectile.velocity = Vector2.Zero;
 				CurrentState = State.Latched;
-				RechargeOwner(); // hooking an enemy refills air uses
+				latchedOntoSomething = true; // hooking an enemy refills air uses (after the pull)
 			}
 		}
 

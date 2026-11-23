@@ -48,6 +48,16 @@ Items: {
 			The stab resets charge even if it misses
 			'''
 	}
+
+	PaintballUmbrella: {
+		DisplayName: Paintball Umbrella
+		Tooltip:
+			'''
+			Blasts a spread of giant paintballs that burst on impact
+			Paintballs have a chance to inflict a debuff based on their color
+			Carry paint to choose the color
+			'''
+	}
 }
 
 Projectiles: {
@@ -58,6 +68,7 @@ Projectiles: {
 	LaevateinnHoldProjectile.DisplayName: Laevateinn Hold Projectile
 	LaevateinnStabProjectile.DisplayName: Laevateinn Stab Projectile
 	LaevateinnSwingProjectile.DisplayName: Laevateinn Swing Projectile
+	GiantPaintball.DisplayName: Giant Paintball
 }
 
 Buffs: {
