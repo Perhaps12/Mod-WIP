@@ -7,7 +7,7 @@ using Terraria.ModLoader;
 using Terraria.Audio;
 using Wprint.Content.Players;
 
-namespace Wprint.Content.Items
+namespace Wprint.Content.Projectiles
 {
 	// Thrown axe behavior: bounce from NPCs and let its owner catch it by touching it.
 	public class catchableaxeProjectile : ModProjectile

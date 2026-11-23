@@ -58,6 +58,23 @@ Items: {
 			Carry paint to choose the color
 			'''
 	}
+
+	RandomHandgun: {
+		DisplayName: Random Handgun
+		Tooltip:
+			'''
+			Changes to a different weapon profile when its shots run out
+			Each profile has its own damage, fire rate, and magazine
+			'''
+		CurrentWeapon: Current: {0} ({1} shots left)
+		Rolling: Rolling: {0}
+		Equipped: Equipped: {0}
+		Glock: Glock
+		UMP: UMP
+		AWP: AWP
+		AK-47: AK-47
+		Knife: Knife
+	}
 }
 
 Projectiles: {
@@ -69,6 +86,7 @@ Projectiles: {
 	LaevateinnStabProjectile.DisplayName: Laevateinn Stab Projectile
 	LaevateinnSwingProjectile.DisplayName: Laevateinn Swing Projectile
 	GiantPaintball.DisplayName: Giant Paintball
+	ThrownGoldShortsword.DisplayName: Thrown Gold Shortsword
 }
 
 Buffs: {

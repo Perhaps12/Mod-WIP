@@ -6,7 +6,7 @@ namespace Wprint.Content.Buffs
 {
 	public class CatchableAxeSpeedBuff : ModBuff
 	{
-		public const float MoveSpeedBonus = 1.3f;
+		public const float MoveSpeedBonus = 1.2f;
 
 		public override string Texture => $"Terraria/Images/Buff_{BuffID.Swiftness}";
 

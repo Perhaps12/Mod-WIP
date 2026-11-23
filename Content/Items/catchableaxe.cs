@@ -2,6 +2,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Wprint.Content.Players;
+using Wprint.Content.Projectiles;
 
 namespace Wprint.Content.Items
 {
@@ -10,15 +11,15 @@ namespace Wprint.Content.Items
 		public override void SetDefaults()
 		{
 			// Basic weapon stats and how often the axe can be used.
-			Item.damage = 27;
+			Item.damage = 32;
 			Item.DamageType = DamageClass.Ranged;
 			Item.width = 75;
 			Item.height = 75;
-			Item.useTime = 30;
+			Item.useTime = 35;
 			Item.useAnimation = 30;
 			Item.useStyle = ItemUseStyleID.Swing;
             Item.noUseGraphic = true;
-            Item.crit = 19;
+            Item.crit = 7;
 			Item.knockBack = 6;
 			Item.value = Item.buyPrice(gold: 1);
 			Item.rare = ItemRarityID.Orange;
@@ -34,7 +35,7 @@ namespace Wprint.Content.Items
 		{
 			// This is a speed multiplier: doubling it at ten stacks halves the 30-tick use interval.
 			int stacks = player.GetModPlayer<CatchableAxePlayer>().Stacks;
-			return 1f / (1f - stacks * 0.05f);
+			return 1f / (1f - stacks * 0.01f);
 		}
 
 		public override void AddRecipes()
