@@ -173,7 +173,7 @@ namespace Wprint.Content.Projectiles
 
 			if (attackDirection.Y > 0.5f)
 			{
-				owner.velocity = -attackDirection * 8f;           // down-slash pogo
+				owner.velocity.Y = -8f;                           // down-slash pogo: bounce up, keep horizontal momentum
 			}
 			else
 			{

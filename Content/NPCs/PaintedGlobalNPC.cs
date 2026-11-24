@@ -11,7 +11,7 @@ namespace Wprint.Content.NPCs
 	{
 		public const int PaintTicks = 5 * 60;   // fade time (5 seconds)
 		const bool OverrideColor = true;       // false = blend the paint over the enemy, true = fully replace its colors
-		const float BlendStrength = 0.8f;       // how strongly the paint shows when blending (0-1), right after a hit
+		const float BlendStrength = 1.2f;       // how strongly the paint shows when blending (0-1), right after a hit
 
 		public override bool InstancePerEntity => true;
 
@@ -50,19 +50,26 @@ namespace Wprint.Content.NPCs
 				paintTimer--;
 		}
 
-		public override void DrawEffects(NPC npc, ref Color drawColor)
+		// Applied in GetAlpha rather than DrawEffects: GetAlpha runs on the final draw color, after vanilla
+		// has tinted it for debuffs like Ichor, so the paint shows on top of those tints.
+		public override Color? GetAlpha(NPC npc, Color drawColor)
 		{
 			if (paintTimer <= 0)
-				return;
+				return null; // not painted: leave the color to vanilla
 
 			float fade = (float)paintTimer / PaintTicks;   // 1 right after the hit -> 0 when it wears off
 
-			// Light the paint the same as the enemy, so painted enemies still darken in the dark
-			float light = drawColor.ToVector3().Length() / Vector3.One.Length();
+			// Light the paint by the world lighting at the enemy, so painted enemies still darken in the dark.
+			// Uses the tile lighting rather than drawColor, because drawColor is already darkened by
+			// debuffs like Oiled, which would make the paint look like it's underneath them.
+			float light = Lighting.GetColor(npc.Center.ToTileCoordinates()).ToVector3().Length() / Vector3.One.Length();
 			Color litPaint = new Color(paintColor.ToVector3() * light) { A = drawColor.A };
 
 			float strength = OverrideColor ? fade : fade * BlendStrength;
-			drawColor = Color.Lerp(drawColor, litPaint, strength);
+			Color painted = Color.Lerp(drawColor, litPaint, strength);
+
+			// Returning a color skips vanilla's GetAlpha, so keep its transparency (npc.alpha) ourselves
+			return painted * ((255 - npc.alpha) / 255f);
 		}
 	}
 }
