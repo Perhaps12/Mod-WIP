@@ -86,7 +86,7 @@ namespace Wprint.Content.Items
 		public override void SetDefaults()
 		{
 			base.SetDefaults();
-			Item.damage = 40;
+			Item.damage = 20;
 		}
 
 		public override void AddRecipes()

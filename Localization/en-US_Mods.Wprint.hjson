@@ -128,6 +128,13 @@ Projectiles: {
 	GiantPaintball.DisplayName: Giant Paintball
 	SnowballProjectile.DisplayName: Snowball
 	ThrownGoldShortsword.DisplayName: Thrown Gold Shortsword
+	SharkMinion.DisplayName: Shark
+	SharkBubble.DisplayName: Bubble
+
+	EokaBlastProjectile: {
+		DiplayName: EokaBlast
+		DisplayName: Eoka Blast Projectile
+	}
 }
 
 Buffs: {

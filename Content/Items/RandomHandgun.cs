@@ -107,12 +107,12 @@ namespace Wprint.Content.Items
 				inaccuracyDegrees: 0f, projectileTypeOverride: ProjectileID.BulletHighVelocity,
 				useGoldShortswordProjectile: false, usesBulletAmmo: true, spriteItemType: ItemID.Musket, tint: new Color(211, 44, 230)),
 			new GunProfile(
-				nameKey: "AK-47", weight: 19, damage: 121, critChance: 2, useTime: 6, magazineSize: 24,
+				nameKey: "AK-47", weight: 19, damage: 111, critChance: 2, useTime: 6, magazineSize: 24,
 				knockback: 4f, useSound: new SoundStyle("Wprint/Sounds/AK47Shot"), equipSound: new SoundStyle("Wprint/Sounds/AK47Equip"), shootSpeed: 18f,
 				inaccuracyDegrees: 2f, projectileTypeOverride: null, useGoldShortswordProjectile: false,
 				usesBulletAmmo: true, spriteItemType: ItemID.ClockworkAssaultRifle, tint: new Color(235, 75, 75)),
 			new GunProfile(
-				nameKey: "Knife", weight: 3, damage: 5000, critChance: 0, useTime: 5, magazineSize: 1,
+				nameKey: "Knife", weight: 3, damage: 2500, critChance: 0, useTime: 5, magazineSize: 1,
 				knockback: 20f, useSound: SoundID.Item11, equipSound: new SoundStyle("Wprint/Sounds/KnifeEquip"), shootSpeed: 30f,
 				inaccuracyDegrees: 0f, projectileTypeOverride: null, useGoldShortswordProjectile: true,
 				usesBulletAmmo: false, spriteItemType: ItemID.Handgun, tint: new Color(228, 174, 51))
