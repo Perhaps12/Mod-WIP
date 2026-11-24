@@ -62,8 +62,8 @@ namespace Wprint.Content.Items
 
 			player.AddBuff(Item.buffType, 2);
 
-			// Base damage for this villager: the staff's own damage (before the player's summon bonuses) plus
-			// the villager's bonus (DamageBonuses in TownVillagerMinion.cs). The game applies the player's summon
+			// Base damage for this villager: the staff's own damage (before the player's summon bonuses) times
+			// the villager's multiplier (DamageMultipliers in TownVillagerMinion.cs). The game applies the player's summon
 			// damage bonuses to originalDamage, so they're applied once here and kept up to date afterwards.
 			// (Using the already-boosted `damage` here applied the bonuses twice.)
 			int baseDamage = TownVillagerMinion.DamageFor(villager, Item.damage);

@@ -20,6 +20,7 @@ namespace Wprint.Content.Projectiles
 		private const float Gravity = 0.4f;
 		private const float MaxFallSpeed = 10f;
 		private const float FlyStartDistance = 500f;   // starts flying back when this far from the player
+		private const float AttackFlyStartDistance = 1400f; // ...or this far while attacking an enemy (lets them roam farther)
 		private const float FlyLandDistance = 160f;    // fallback landing range around the player (when its fly spot is inside blocks)
 		private const float FlyArriveDistance = 24f;   // lands once this close to its fly spot
 		private const float FlySpeed = 10f;            // base fly speed; goes faster the farther away it is
@@ -40,7 +41,9 @@ namespace Wprint.Content.Projectiles
 		// Melee villagers (chasing an enemy)
 		private const float MeleeChaseSpeed = 9f;      // max walk speed while chasing an enemy...
 		private const float MeleeChaseSpeedFar = 12f;  // ...and when the enemy is far away
-		private const float MeleeMaxJumpSpeed = 14f;   // jump at enemies much higher (about 15 tiles)
+		private const float MeleeChaseAcceleration = 0.6f; // speeds up and turns around faster than walking
+		private const float MeleeStickDistance = 24f;  // this close to the enemy: matches its movement to stay on it
+		private const float MeleeMaxJumpSpeed = 18f;   // jump at enemies much higher (about 25 tiles)
 		private const float MeleeJumpMinHeight = 16f;  // jumps at enemies at least this much higher...
 		private const float MeleeJumpSidewaysRange = 25 * 16f; // ...and this close sideways
 		private const int MeleeJumpCooldownTicks = 6;
@@ -102,8 +105,30 @@ namespace Wprint.Content.Projectiles
 				return;
 			}
 
+			// Melee villagers fighting an enemy stay on it instead of following the group back to the player:
+			// they only fly back if they themselves get too far away from the player, and if they were flying
+			// back when an enemy showed up, they drop out of the air (once clear of blocks) to go after it
+			bool meleeFighting = target != null && Range == CombatRange.Melee;
+			if (meleeFighting)
+			{
+				bool tooFar = System.Math.Abs(Projectile.Center.X - owner.Center.X) > AttackFlyStartDistance;
+				if (!Flying && tooFar)
+				{
+					Flying = true;
+					reachedLevel = false;
+					Projectile.netUpdate = true;
+				}
+				else if (Flying && !tooFar
+					&& !Collision.SolidCollision(Projectile.position, Projectile.width, Projectile.height))
+				{
+					Flying = false;
+					reachedLevel = false;
+					Projectile.tileCollide = true;
+					Projectile.netUpdate = true;
+				}
+			}
 			// Start flying: one shared decision for all of the player's villagers, so they take off together
-			if (!Flying && GroupShouldFly(owner))
+			else if (!Flying && GroupShouldFly(owner, target))
 			{
 				Flying = true;
 				reachedLevel = false; // start with phase 1: get to the player's level
@@ -120,11 +145,13 @@ namespace Wprint.Content.Projectiles
 		// to the player (so they don't take off at different times depending on their place in the line-up).
 		// They prefer the ground: the player flying around above them is not a reason to fly.
 		//   - even the nearest villager is more than FlyStartDistance from the player sideways
+		//     (AttackFlyStartDistance while there's an enemy to fight, so they can go farther to attack)
 		//   - the player is standing on something higher up than the nearest villager can jump to
-		private bool GroupShouldFly(Player owner)
+		private bool GroupShouldFly(Player owner, NPC target)
 		{
 			Projectile nearest = NearestVillager(owner) ?? Projectile;
-			if (System.Math.Abs(nearest.Center.X - owner.Center.X) > FlyStartDistance)
+			float startDistance = target != null ? AttackFlyStartDistance : FlyStartDistance;
+			if (System.Math.Abs(nearest.Center.X - owner.Center.X) > startDistance)
 				return true;
 
 			float heightAbove = nearest.Bottom.Y - owner.Bottom.Y;
@@ -264,7 +291,15 @@ namespace Wprint.Content.Projectiles
 			// Horizontal: accelerate toward the destination, slow down near it
 			float offsetX = destinationX - Projectile.Center.X;
 			int direction = System.Math.Sign(offsetX);
-			if (System.Math.Abs(offsetX) < 10f)
+			bool chasing = target != null && Range == CombatRange.Melee;
+			if (chasing && System.Math.Abs(offsetX) < MeleeStickDistance)
+			{
+				// On the enemy: match its movement (plus a nudge toward the spot) so it sticks to it
+				// instead of stopping and letting the enemy walk away
+				float desiredX = target.velocity.X + offsetX * 0.2f;
+				Projectile.velocity.X = MathHelper.Lerp(Projectile.velocity.X, desiredX, 0.35f);
+			}
+			else if (System.Math.Abs(offsetX) < 10f)
 			{
 				Projectile.velocity.X *= 0.8f;
 				if (System.Math.Abs(Projectile.velocity.X) < 0.1f)
@@ -272,17 +307,20 @@ namespace Wprint.Content.Projectiles
 			}
 			else
 			{
-				// Melee villagers chase enemies faster; everyone keeps up with a running player
-				bool chasing = target != null && Range == CombatRange.Melee;
+				// Melee villagers chase enemies faster (and can always outrun the enemy); everyone keeps up
+				// with a running player
 				bool far = System.Math.Abs(offsetX) > 300f;
 				float maxSpeed = chasing
 					? (far ? MeleeChaseSpeedFar : MeleeChaseSpeed)
 					: (far ? WalkSpeedFar : WalkSpeed);
 				maxSpeed = System.Math.Max(maxSpeed, System.Math.Abs(owner.velocity.X) + 1f);
+				if (chasing)
+					maxSpeed = System.Math.Max(maxSpeed, System.Math.Abs(target.velocity.X) + 2f);
+				float acceleration = chasing ? MeleeChaseAcceleration : WalkAcceleration;
 
-				Projectile.velocity.X += direction * WalkAcceleration;
+				Projectile.velocity.X += direction * acceleration;
 				if (System.Math.Sign(Projectile.velocity.X) != direction)
-					Projectile.velocity.X += direction * WalkAcceleration; // turn around faster
+					Projectile.velocity.X += direction * acceleration; // turn around faster
 				Projectile.velocity.X = MathHelper.Clamp(Projectile.velocity.X, -maxSpeed, maxSpeed);
 			}
 
@@ -320,8 +358,10 @@ namespace Wprint.Content.Projectiles
 					else if (meleeChasing && System.Math.Abs(targetDx) < MeleeLungeRange
 						&& System.Math.Abs(targetHeight) <= MeleeJumpMinHeight)
 					{
+						// Hop toward where the enemy will be, not past it
 						Projectile.velocity.Y = -MeleeLungeJumpSpeed;
-						Projectile.velocity.X = System.Math.Sign(targetDx) * MeleeLungeSpeed;
+						Projectile.velocity.X = MathHelper.Clamp(target.velocity.X + targetDx * 0.15f,
+							-MeleeLungeSpeed, MeleeLungeSpeed);
 						jumpCooldown = MeleeLungeCooldownTicks;
 					}
 					// Midrange climbing to a spot at the enemy's height (TownVillagerMinion.Combat.cs): when near

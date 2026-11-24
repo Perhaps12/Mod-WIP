@@ -19,12 +19,12 @@ namespace Wprint.Content.Projectiles
 
 		// Which villager the staff summons first (index into Villagers below: 0 = Guide, 1 = Merchant,
 		// 2 = Demolitionist, ...). Later summons continue in order from there and wrap around to the start.
-		public const int FirstVillager = 5;
+		public const int FirstVillager = 0;
 
 		private const float TargetRange = 800f;        // enemies within this distance of the player get attacked (50 tiles)
 		private const float MeleeTargetRange = 1200f;  // melee villagers seek out enemies farther away (75 tiles)
 
-		// Summon order. Keep Villagers, AttackIntervals, DamageBonuses and Ranges (TownVillagerMinion.Combat.cs)
+		// Summon order. Keep Villagers, AttackIntervals, DamageMultipliers and Ranges (TownVillagerMinion.Combat.cs)
 		// in the same order.
 		// Attacks are picked by NPC type in FireAt, so reordering this list doesn't mix them up.
 		private static readonly int[] Villagers =
@@ -48,37 +48,37 @@ namespace Wprint.Content.Projectiles
 		{
 			48,  // Guide
 			40,  // Merchant
-			105, // Demolitionist
+			90, // Demolitionist
 			20,  // Zoologist (melee: unused)
 			45,  // Dryad (aura refresh)
 			12,   // Arms Dealer
-			82,  // Party Girl
-			90,  // Clothier
-			38,  // Wizard
-			36,  // Steampunker (pause between bursts, see BurstShots in TownVillagerMinion.Combat.cs)
+			90,  // Party Girl
+			75,  // Clothier
+			20,  // Wizard
+			30,  // Steampunker (pause between bursts, see BurstShots in TownVillagerMinion.Combat.cs)
 			36,  // Princess
 		};
 
-		// Damage added to the Towncall Staff's damage for each villager (per hit). Negative values are fine.
-		// (The Dryad doesn't deal damage, so hers is unused.)
-		private static readonly int[] DamageBonuses =
+		// Each villager's damage per hit, as a multiple of the Towncall Staff's damage (1.5 = 150%), so it scales
+		// with the staff. (The Dryad doesn't deal damage, so hers is unused.)
+		private static readonly float[] DamageMultipliers =
 		{
-			0,   // Guide
-			5,   // Merchant
-			10,  // Demolitionist
-			15,  // Zoologist
-			20,  // Dryad (unused)
-			10,  // Arms Dealer
-			100,  // Party Girl
-			35,  // Clothier
-			40,  // Wizard
-			45,  // Steampunker
-			50,  // Princess
+			1.00f, // Guide
+			1.25f, // Merchant
+			3.25f, // Demolitionist
+			0.85f, // Zoologist
+			2.00f, // Dryad (unused)
+			0.80f, // Arms Dealer
+			10.00f, // Party Girl
+			4.00f, // Clothier
+			4.00f, // Wizard
+			4.00f, // Steampunker
+			8.00f, // Princess
 		};
 
 		// Damage for a villager summoned by a staff dealing staffDamage (used by the Towncall Staff)
 		public static int DamageFor(int villagerIndex, int staffDamage) =>
-			System.Math.Max(1, staffDamage + DamageBonuses[System.Math.Clamp(villagerIndex, 0, VillagerCount - 1)]);
+			System.Math.Max(1, (int)System.Math.Round(staffDamage * DamageMultipliers[System.Math.Clamp(villagerIndex, 0, VillagerCount - 1)]));
 
 		private ref float AttackTimer => ref Projectile.localAI[0];
 		private int VillagerIndex => (int)Projectile.ai[0];

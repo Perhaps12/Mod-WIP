@@ -32,21 +32,37 @@ namespace Wprint.Content.Projectiles
 			CombatRange.Ranged,   // Princess
 		};
 
-		private const float MidrangeMin = 8 * 16f;
-		private const float MidrangeMax = 20 * 16f;
+		private const float MidrangeMin = 6 * 16f;
+		private const float MidrangeMax = 10 * 16f;
 		private const float RangedMin = 15 * 16f;
 		private const float RangedMax = 30 * 16f;
-		private const float MeleeStandOffset = 12f;    // melee villagers get right up to the enemy (px from its center)
+		private const float MeleeLeadTicks = 8f;       // melee villagers aim this many ticks ahead of a moving enemy...
+		private const float MeleeLeadFullDistance = 6 * 16f; // ...when at least this far from it (less lead closer in)
 		private const float ArriveDistance = 16f;      // close enough to the attack spot to stop repositioning
 
 		// The vanilla Resonance Scepter is not exposed as an ItemID constant in this tModLoader build.
 		private const int ResonanceScepterItem = 5065;
 
-		// How fast lobbed shots fall (px/tick^2), used to aim their arc. Raise it if they land short,
-		// lower it if they overshoot.
-		private const float GrenadeGravity = 0.2f;   // Demolitionist's grenades
-		private const float PartyGrenadeGravity = 0.2f; // Party Girl's party grenades (tune separately if she misses)
-		private const float FireballGravity = 0.2f;  // Wizard's bouncing fireballs
+		// How lobbed shots fly, used to aim their arc (the aim simulates the flight tick by tick):
+		//   gravity      - added to the fall speed each tick. Raise it if they land short, lower if they overshoot.
+		//   gravityDelay - ticks after being thrown before gravity kicks in (vanilla grenades fly straight briefly)
+		//   drag         - sideways speed is multiplied by this each tick (1 = no slowdown)
+		//   maxFall      - fastest fall speed
+		private readonly struct LobPhysics
+		{
+			public readonly float Gravity, Drag, MaxFall;
+			public readonly int GravityDelay;
+			public LobPhysics(float gravity, int gravityDelay, float drag, float maxFall)
+			{
+				Gravity = gravity; GravityDelay = gravityDelay; Drag = drag; MaxFall = maxFall;
+			}
+		}
+		private static readonly LobPhysics GrenadePhysics = new(0.2f, 5, 0.99f, 16f);      // Demolitionist's grenades
+		private static readonly LobPhysics PartyGrenadePhysics = new(0.2f, 5, 0.99f, 16f); // Party Girl's party grenades
+		private static readonly LobPhysics FireballPhysics = new(0.2f, 0, 1f, 16f);        // Wizard's bouncing fireballs
+
+		private const int LobSimulateTicks = 150; // longest flight the aim simulates
+		private const int LobAngleSteps = 80;     // throw angles tried when aiming a lob (more = finer aim)
 
 		// Longest lead it will aim with (ticks of travel), so it doesn't aim wildly at far, fast enemies
 		private const float MaxLeadTicks = 90f;
@@ -159,7 +175,13 @@ namespace Wprint.Content.Projectiles
 			switch (Range)
 			{
 				case CombatRange.Melee:
-					return target.Center.X + side * MeleeStandOffset; // right up to the enemy
+				{
+					// Straight onto the enemy's center (not beside it), so their hitboxes overlap. While still
+					// far away it aims ahead of a moving enemy to catch up; the lead shrinks to nothing as it
+					// gets close, so it ends up on the enemy rather than in front of it.
+					float leadFraction = MathHelper.Clamp((distance - target.width / 2f) / MeleeLeadFullDistance, 0f, 1f);
+					return target.Center.X + target.velocity.X * MeleeLeadTicks * leadFraction;
+				}
 
 				case CombatRange.Midrange:
 					// Enemy too high above to reach: climb up to a spot at about its height instead
@@ -272,7 +294,7 @@ namespace Wprint.Content.Projectiles
 			float speed;
 			float spread = 0f;
 			bool lob = false;               // thrown in an arc (affected by gravity)
-			float gravity = GrenadeGravity; // how fast a lobbed shot falls
+			LobPhysics physics = GrenadePhysics; // how a lobbed shot flies
 			bool placeOnTarget = false;     // created right on the enemy, standing still, instead of being fired
 
 			// Picked by NPC type, so it doesn't depend on the order of the Villagers list
@@ -295,7 +317,7 @@ namespace Wprint.Content.Projectiles
 					projectileType = ProjectileID.PartyGirlGrenade;
 					speed = 9f;
 					lob = true; // same arc + lead-aiming as the Demolitionist
-					gravity = PartyGrenadeGravity;
+					physics = PartyGrenadePhysics;
 					break;
 				case NPCID.ArmsDealer:
 					projectileType = ProjectileID.Bullet;
@@ -310,7 +332,7 @@ namespace Wprint.Content.Projectiles
 					projectileType = ProjectileID.BallofFire;
 					speed = 10f;
 					lob = true;
-					gravity = FireballGravity;
+					physics = FireballPhysics;
 					break;
 				case NPCID.Steampunker:
 					projectileType = ProjectileID.BulletHighVelocity;
@@ -337,10 +359,9 @@ namespace Wprint.Content.Projectiles
 				// Lead the target: aim where it will be when the shot arrives (based on its current velocity).
 				// Shots that fall under gravity are aimed in an arc that lands there; everything else flies
 				// straight at it.
-				Vector2 predicted = PredictTargetOffset(target, projectileType, speed, lob, gravity);
 				Vector2 aim = lob
-					? LobDirection(predicted, speed, gravity)
-					: predicted.SafeNormalize(Vector2.UnitX);
+					? AimLob(target, speed, physics)
+					: PredictTargetOffset(target, projectileType, speed).SafeNormalize(Vector2.UnitX);
 				if (spread > 0f)
 					aim = aim.RotatedBy(Main.rand.NextFloat(-spread, spread));
 				spawnPosition = Projectile.Center;
@@ -370,10 +391,10 @@ namespace Wprint.Content.Projectiles
 
 		// ---- Aiming ----
 
-		// Where the target will be (relative to this villager) when a shot fired now reaches it.
+		// Where the target will be (relative to this villager) when a straight shot fired now reaches it.
 		// Estimates the travel time, moves the target along its velocity by that much, and repeats
 		// a few times so the estimate settles.
-		private Vector2 PredictTargetOffset(NPC target, int projectileType, float speed, bool lob, float gravity)
+		private Vector2 PredictTargetOffset(NPC target, int projectileType, float speed)
 		{
 			Vector2 offset = target.Center - Projectile.Center;
 
@@ -385,42 +406,123 @@ namespace Wprint.Content.Projectiles
 			Vector2 predicted = offset;
 			for (int i = 0; i < 3; i++)
 			{
-				float travelTicks;
-				if (lob)
-				{
-					// Grenades: time = sideways distance / sideways speed of the arc
-					float sidewaysSpeed = System.Math.Abs(LobDirection(predicted, speed, gravity).X) * speedPerTick;
-					travelTicks = sidewaysSpeed > 0.1f ? System.Math.Abs(predicted.X) / sidewaysSpeed : 0f;
-				}
-				else
-				{
-					travelTicks = predicted.Length() / speedPerTick;
-				}
-
+				float travelTicks = predicted.Length() / speedPerTick;
 				predicted = offset + target.velocity * System.Math.Min(travelTicks, MaxLeadTicks);
 			}
 			return predicted;
 		}
 
-		// Direction to throw at `speed` so a projectile falling with `gravity` lands on `offset`
-		// (target position relative to the thrower). Uses the flatter of the two possible arcs.
-		// If the target is out of reach, throws at 45 degrees (the longest throw) toward it.
-		private static Vector2 LobDirection(Vector2 offset, float speed, float gravity)
+		// Direction to throw a lobbed shot so it lands on the enemy, leading it. Each guess of where the enemy
+		// will be gives an arc and a flight time (from simulating the shot's real flight), which gives a
+		// better guess of where the enemy will be; repeated a few times so it settles.
+		private Vector2 AimLob(NPC target, float speed, LobPhysics physics)
 		{
-			float x = System.Math.Abs(offset.X);
-			float up = -offset.Y;                 // height of the target above the thrower
+			Vector2 offset = target.Center - Projectile.Center;
+			Vector2 predicted = offset;
+			Vector2 direction = Vector2.UnitX;
+			for (int i = 0; i < 4; i++)
+			{
+				direction = LobDirection(predicted, speed, physics, out float travelTicks);
+				predicted = offset + target.velocity * System.Math.Min(travelTicks, MaxLeadTicks);
+			}
+			return direction;
+		}
+
+		// Direction to throw at `speed` so a shot flying with `physics` passes through `offset` (relative to
+		// the thrower), and how many ticks it takes to get there. Tries throw angles from low to high and
+		// picks the flattest arc that gets there. Out of reach: the throw that gets closest.
+		private static Vector2 LobDirection(Vector2 offset, float speed, LobPhysics physics, out float travelTicks)
+		{
 			int side = offset.X >= 0f ? 1 : -1;
-			if (x < 1f)
-				return new Vector2(0f, up >= 0f ? -1f : 1f);
+			float x = System.Math.Abs(offset.X);
+			if (x < 8f)
+			{
+				// Right above or below: throw straight up or down
+				travelTicks = System.Math.Abs(offset.Y) / System.Math.Max(speed, 1f);
+				return new Vector2(0f, offset.Y < 0f ? -1f : 1f);
+			}
 
-			float s2 = speed * speed;
-			float discriminant = s2 * s2 - gravity * (gravity * x * x + 2f * up * s2);
-			float angle = discriminant < 0f
-				? MathHelper.PiOver4
-				: (float)System.Math.Atan((s2 - (float)System.Math.Sqrt(discriminant)) / (gravity * x));
+			const float minAngle = -1.2f; // about -70 degrees (throwing downward)
+			const float maxAngle = 1.4f;  // about 80 degrees (throwing upward)
+			float bestError = float.MaxValue;
+			float bestAngle = MathHelper.PiOver4;
+			float bestTicks = 0f;
+			float prevAngle = minAngle;
+			float prevMiss = float.NaN;
+			for (int step = 0; step <= LobAngleSteps; step++)
+			{
+				float angle = MathHelper.Lerp(minAngle, maxAngle, step / (float)LobAngleSteps);
+				float miss = SimulateLob(angle, speed, physics, x, offset.Y, out float ticks);
+				if (float.IsNaN(miss))
+				{
+					prevMiss = float.NaN;
+					continue; // doesn't get that far
+				}
 
+				// Going from low to high, the first angle where the shot goes from passing below the enemy
+				// to passing above it is the flattest arc that hits: narrow it down between the two angles
+				if (!float.IsNaN(prevMiss) && prevMiss > 0f && miss <= 0f)
+				{
+					float low = prevAngle, high = angle;
+					for (int i = 0; i < 10; i++)
+					{
+						float mid = (low + high) / 2f;
+						float midMiss = SimulateLob(mid, speed, physics, x, offset.Y, out _);
+						if (!float.IsNaN(midMiss) && midMiss > 0f)
+							low = mid;
+						else
+							high = mid;
+					}
+					bestAngle = (low + high) / 2f;
+					SimulateLob(bestAngle, speed, physics, x, offset.Y, out bestTicks);
+					bestError = 0f;
+					break;
+				}
+
+				// Out of reach: remember the throw that comes closest
+				if (System.Math.Abs(miss) < bestError)
+				{
+					bestError = System.Math.Abs(miss);
+					bestAngle = angle;
+					bestTicks = ticks;
+				}
+				prevAngle = angle;
+				prevMiss = miss;
+			}
+
+			travelTicks = bestTicks;
 			// angle is measured upward from horizontal; screen Y points down
-			return new Vector2(side * (float)System.Math.Cos(angle), -(float)System.Math.Sin(angle));
+			return new Vector2(side * (float)System.Math.Cos(bestAngle), -(float)System.Math.Sin(bestAngle));
+		}
+
+		// Flies a shot thrown at `angle` (up from horizontal) until it's `targetX` px away sideways. Returns how
+		// far below `targetY` it is at that point (px; negative = above), and the ticks it took. If it never
+		// gets that far (drag stops it, or it takes too long), returns NaN.
+		private static float SimulateLob(float angle, float speed, LobPhysics physics, float targetX, float targetY,
+			out float ticks)
+		{
+			float vx = (float)System.Math.Cos(angle) * speed;
+			float vy = -(float)System.Math.Sin(angle) * speed;
+			float px = 0f, py = 0f;
+			for (int t = 1; t <= LobSimulateTicks; t++)
+			{
+				float prevX = px, prevY = py;
+				px += vx;
+				py += vy;
+				if (px >= targetX)
+				{
+					// Interpolate to exactly targetX for a precise height and time
+					float f = vx > 0f ? (targetX - prevX) / vx : 1f;
+					float yAtTarget = prevY + (py - prevY) * f;
+					ticks = t - 1 + f;
+					return yAtTarget - targetY; // screen Y points down, so positive = below the target
+				}
+				if (t > physics.GravityDelay)
+					vy = System.Math.Min(vy + physics.Gravity, physics.MaxFall);
+				vx *= physics.Drag;
+			}
+			ticks = LobSimulateTicks;
+			return float.NaN;
 		}
 	}
 }
