@@ -22,6 +22,11 @@ Items: {
 		Tooltip: ""
 	}
 
+	EnergySword: {
+		DisplayName: Energy Sword
+		Tooltip: Hold left click to charge; release to swing
+	}
+
 	Clawline: {
 		DisplayName: Clawline
 		Tooltip: ""
@@ -131,6 +136,7 @@ Items: {
 Projectiles: {
 	catchableaxeProjectile.DisplayName: catchableaxe Projectile
 	NailSlash.DisplayName: Nail Slash
+	EnergySwordSwing.DisplayName: Energy Sword Swing
 	ClawlineHook.DisplayName: Clawline Hook
 	BlastPackProjectile.DisplayName: Blast Pack
 	LaevateinnHoldProjectile.DisplayName: Laevateinn Hold Projectile
@@ -148,6 +154,8 @@ Projectiles: {
 		DiplayName: EokaBlast
 		DisplayName: Eoka Blast Projectile
 	}
+
+	EnergySwordCharge.DisplayName: Energy Sword Charge
 }
 
 Buffs: {

@@ -30,7 +30,7 @@ namespace Wprint.Content.Items
 			Item.useTime = 20;
 			Item.useAnimation = 20;
 			Item.useStyle = ItemUseStyleID.Shoot;
-			Item.knockBack = 12f;
+			Item.knockBack = 8f;
 			Item.value = Item.buyPrice(silver: 50);
 			Item.rare = ItemRarityID.Blue;
 			Item.UseSound = SoundID.Item1;
