@@ -9,18 +9,20 @@ namespace Wprint.Content.Items
 {
 	public class Snowballer : ModItem
 	{
+		public virtual float SnowballSizeMultiplier => 1f;
+
 		public override string Texture => $"Terraria/Images/Item_{ItemID.Snowball}";
 
 		public override void SetDefaults()
 		{
 			Item.width = 32;
 			Item.height = 32;
-			Item.damage = 10;
+			Item.damage = 20;
 			Item.DamageType = DamageClass.Melee;
 			Item.useTime = 20;
 			Item.useAnimation = 20;
 			Item.useStyle = ItemUseStyleID.Shoot;
-			Item.knockBack = 10f;
+			Item.knockBack = 12f;
 			Item.value = Item.buyPrice(silver: 50);
 			Item.rare = ItemRarityID.Blue;
 			Item.UseSound = SoundID.Item1;
@@ -51,7 +53,7 @@ namespace Wprint.Content.Items
 				aim = Vector2.UnitX * player.direction;
 			}
 
-			Projectile heldSnowball = SnowballProjectile.FindHeldSnowball(player);
+			Projectile heldSnowball = SnowballProjectile.FindHeldSnowball(player, SnowballSizeMultiplier);
 			if (heldSnowball != null)
 			{
 				aim.Normalize();
@@ -68,16 +70,29 @@ namespace Wprint.Content.Items
 				knockback,
 				player.whoAmI,
 				1f,
-				SnowballProjectile.HeldMode);
+				SnowballProjectile.HeldMode,
+				SnowballSizeMultiplier);
 
 			return false;
+		}
+	}
+
+	public class Slushballer : Snowballer
+	{
+		public override float SnowballSizeMultiplier => 2.2f;
+
+		public override string Texture => $"Terraria/Images/Projectile_{ProjectileID.SlushBall}";
+
+		public override void SetDefaults()
+		{
+			base.SetDefaults();
+			Item.damage = 20;
 		}
 
 		public override void AddRecipes()
 		{
 			Recipe recipe = CreateRecipe();
-			recipe.AddIngredient(ItemID.Snowball, 10);
-			recipe.AddIngredient(ItemID.SnowBlock, 20);
+			recipe.AddIngredient(ModContent.ItemType<Snowballer>(), 3);
 			recipe.AddTile(TileID.WorkBenches);
 			recipe.Register();
 		}
