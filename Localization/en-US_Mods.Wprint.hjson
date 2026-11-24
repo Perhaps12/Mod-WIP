@@ -59,6 +59,21 @@ Items: {
 			'''
 	}
 
+	Snowballer: {
+		DisplayName: Snowballer
+		Tooltip:
+			'''
+			Left click to create a snowball in front of you
+			The snowball stays in front of you and grows as you move, up to 10 times its base size
+			It damages enemies that touch it
+			Left click again to throw it toward the cursor; larger snowballs deal more damage and fly faster
+			Large thrown snowballs split into smaller snowballs when they hit an enemy or the ground
+			Impacts create a snow burst that grows with the snowball's size
+			Custom sounds play when snowballs hit enemies or break
+			A sound plays when the snowball reaches maximum size
+			'''
+	}
+
 	RandomHandgun: {
 		DisplayName: Random Handgun
 		Tooltip:
@@ -86,6 +101,7 @@ Projectiles: {
 	LaevateinnStabProjectile.DisplayName: Laevateinn Stab Projectile
 	LaevateinnSwingProjectile.DisplayName: Laevateinn Swing Projectile
 	GiantPaintball.DisplayName: Giant Paintball
+	SnowballProjectile.DisplayName: Snowball
 	ThrownGoldShortsword.DisplayName: Thrown Gold Shortsword
 }
 
