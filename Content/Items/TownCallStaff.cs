@@ -21,7 +21,7 @@ namespace Wprint.Content.Items
 
 		public override void SetDefaults()
 		{
-			Item.damage = 22;
+			Item.damage = 20;
 			Item.knockBack = 2f;
 			Item.mana = 10;
 			Item.width = 32;
@@ -61,16 +61,24 @@ namespace Wprint.Content.Items
 				return false;
 
 			player.AddBuff(Item.buffType, 2);
+
+			// Base damage for this villager: the staff's own damage (before the player's summon bonuses) plus
+			// the villager's bonus (DamageBonuses in TownVillagerMinion.cs). The game applies the player's summon
+			// damage bonuses to originalDamage, so they're applied once here and kept up to date afterwards.
+			// (Using the already-boosted `damage` here applied the bonuses twice.)
+			int baseDamage = TownVillagerMinion.DamageFor(villager, Item.damage);
+			int boostedDamage = (int)player.GetTotalDamage(Item.DamageType).ApplyTo(baseDamage);
+
 			Projectile minion = Projectile.NewProjectileDirect(
 				source,
 				player.Center,
 				Vector2.Zero,
 				type,
-				damage + villager * 5,
+				boostedDamage,
 				knockback,
 				player.whoAmI,
 				villager);
-			minion.originalDamage = minion.damage;
+			minion.originalDamage = baseDamage;
 			return false;
 		}
 
