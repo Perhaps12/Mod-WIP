@@ -4,26 +4,29 @@ using Terraria.ModLoader;
 
 namespace Wprint.Content.Items
 {
-	// This is a basic item template.
-	// Please see tModLoader's ExampleMod for every other example:
-	// https://github.com/tModLoader/tModLoader/tree/stable/ExampleMod
-	public class sample : ModItem
-	{
+    // This is a basic item template.
+    // Please see tModLoader's ExampleMod for every other example:
+    // https://github.com/tModLoader/tModLoader/tree/stable/ExampleMod
+#pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
+    public class sample : ModItem
+#pragma warning restore CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
+    {
 		// The Display Name and Tooltip of this item can be edited in the 'Localization/en-US_Mods.Wprint.hjson' file.
 		public override void SetDefaults()
 		{
-			Item.damage = 50;
+			Item.damage = 50000;
 			Item.DamageType = DamageClass.Melee;
-			Item.width = 40;
-			Item.height = 40;
-			Item.useTime = 20;
-			Item.useAnimation = 20;
+			Item.width = 100;
+			Item.height = 100;
+			Item.useTime = 4;
+			Item.useAnimation = 10;
 			Item.useStyle = ItemUseStyleID.Swing;
 			Item.knockBack = 6;
 			Item.value = Item.buyPrice(silver: 1);
 			Item.rare = ItemRarityID.Blue;
 			Item.UseSound = SoundID.Item1;
 			Item.autoReuse = true;
+			Item.scale = 5f;          // debug weapon: 10x size (40px sprite -> ~25 tiles long); the swing hitbox grows with it
 		}
 
 		public override void AddRecipes()

@@ -37,10 +37,17 @@ namespace Wprint.Content.Items
 			[ItemID.PinkPaint] = Pink,       [ItemID.DeepPinkPaint] = Pink,
 		};
 
-		// Closest vanilla paint color to a hue. The 12 basic paints (Red, Orange, Yellow, Lime, Green,
+		// Tiles are always painted with Deep paints. The 12 basic paints (Red, Orange, Yellow, Lime, Green,
 		// Teal, Cyan, Sky Blue, Blue, Purple, Violet, Pink = paint colors 1-12) are spaced 1/12 apart
-		// around the color wheel, starting at red.
-		static byte HueToPaintColor(float hue) => (byte)((int)System.Math.Round(hue * 12f) % 12 + 1);
+		// around the color wheel starting at red; their Deep versions are the same order at 13-24.
+		const byte DeepPaintOffset = 12;
+
+		// Closest Deep paint color to a hue
+		static byte HueToDeepPaintColor(float hue) => (byte)((int)System.Math.Round(hue * 12f) % 12 + 1 + DeepPaintOffset);
+
+		// A basic paint color (1-12) turned into its Deep version; Deep colors are kept as they are
+		static byte ToDeepPaintColor(byte paintColor) =>
+			paintColor >= 1 && paintColor <= 12 ? (byte)(paintColor + DeepPaintOffset) : paintColor;
 
 		// First matching paint in the inventory (ammo slots first, then the rest), or null
 		static Item FindPaint(Player player)
@@ -60,7 +67,7 @@ namespace Wprint.Content.Items
 		public override void SetDefaults()
 		{
 			Item.CloneDefaults(ItemID.OnyxBlaster);        // damage, use time, knockback, rarity, value, sound...
-			Item.damage = 35;                              // per paintball
+			Item.damage = 40;                              // per paintball
 			Item.shoot = ModContent.ProjectileType<GiantPaintball>();
 			Item.useAmmo = AmmoID.None;                    // paintballs are free, like the Paintball Gun
 			Item.shootSpeed = 15f;                         // much faster than the Onyx Blaster's shots
@@ -74,8 +81,9 @@ namespace Wprint.Content.Items
 			// in your inventory if you have one, otherwise random
 			Item paint = FindPaint(player);
 			float hue = paint != null ? PaintHues[paint.type] : Main.rand.NextFloat();
-			// The bursts paint tiles: with the carried paint's exact color, or the closest paint to the hue
-			float tilePaint = paint != null ? paint.paint : HueToPaintColor(hue);
+			// The bursts paint tiles with Deep paint: the Deep version of the carried paint, or the
+			// closest Deep paint to the hue
+			float tilePaint = paint != null ? ToDeepPaintColor(paint.paint) : HueToDeepPaintColor(hue);
 
 			for (int i = 0; i < Pellets; i++)
 			{
