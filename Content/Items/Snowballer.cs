@@ -15,7 +15,7 @@ namespace Wprint.Content.Items
 		{
 			Item.width = 32;
 			Item.height = 32;
-			Item.damage = 10;
+			Item.damage = 20;
 			Item.DamageType = DamageClass.Melee;
 			Item.useTime = 20;
 			Item.useAnimation = 20;
