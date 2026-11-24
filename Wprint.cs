@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Wprint.Content.NPCs;
 using Wprint.Content.Players;
 
 namespace Wprint
@@ -17,7 +19,8 @@ namespace Wprint
 		CatchableAxeCaught,
 		SyncCatchableAxeState,
 		LaevateinnChargeState,
-		LaevateinnResetCharge
+		LaevateinnResetCharge,
+		PaintNPC
 	}
 
 	// Please read https://github.com/tModLoader/tModLoader/wiki/Basic-tModLoader-Modding-Guide#mod-skeleton-contents for more information about the various files in a mod.
@@ -92,6 +95,22 @@ namespace Wprint
 				LaevateinnPlayer laevateinnPlayer = Main.player[playerIndex].GetModPlayer<LaevateinnPlayer>();
 				laevateinnPlayer.ResetCharge();
 				laevateinnPlayer.SendChargeState(-1, whoAmI);
+			}
+			else if (packetType == WprintPacketType.PaintNPC)
+			{
+				int npcIndex = reader.ReadInt16();
+				Color color = new Color(reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
+				if (npcIndex < 0 || npcIndex >= Main.maxNPCs)
+				{
+					return;
+				}
+
+				Main.npc[npcIndex].GetGlobalNPC<PaintedGlobalNPC>().SetPaint(color);
+				// The server passes the paint on to every other client
+				if (Main.netMode == NetmodeID.Server)
+				{
+					PaintedGlobalNPC.SendPaint(npcIndex, color, -1, whoAmI);
+				}
 			}
 		}
 	}

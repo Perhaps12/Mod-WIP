@@ -115,18 +115,70 @@ namespace Wprint.Content.Projectiles
 			return false; // we did the drawing ourselves
 		}
 
-		// Pogo on any hit, with a stronger bounce for downward attacks.
-		public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
+		bool bounced; // pushback applies once per swing, even if it hits several enemies
+
+		// Knockback is applied by hand in OnHitNPC, so turn off vanilla's for this hit. Vanilla's was
+		// unreliable here (often only 1-2 enemies in a group got pushed), and it picks the side from the
+		// projectile's velocity, which is rotated 90 degrees from the aim (see Nail.Shoot).
+		public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
+		{
+			modifiers.DisableKnockback();
+			modifiers.HitDirectionOverride = KnockbackSide(target); // hit effects still face away from the player
+		}
+
+		// Which side of the player the enemy is on (+1 right, -1 left)
+		int KnockbackSide(NPC target)
 		{
 			Player owner = Main.player[Projectile.owner];
-			Vector2 attackDirection = Projectile.velocity.RotatedBy(-Projectile.ai[1] * MathHelper.PiOver2);
-			if (attackDirection.Y < -0.5f)
+			float side = target.Center.X - owner.Center.X;
+			return side != 0f ? System.Math.Sign(side) : owner.direction;
+		}
+
+		// Push every enemy the slash hits away from the player, scaled by its knockback resistance
+		// (bosses and other immovable enemies have 0, so they don't move)
+		void ApplyKnockback(NPC target)
+		{
+			float strength = Projectile.knockBack * target.knockBackResist;
+			if (strength <= 0f)
 			{
 				return;
 			}
 
-			float bounceSpeed = attackDirection.Y > 0.5f ? 8f : 2f;
-			owner.velocity = -attackDirection * bounceSpeed;
+			target.velocity.X = KnockbackSide(target) * strength;
+			if (!target.noGravity)
+			{
+				target.velocity.Y = -strength * 0.3f; // small hop, like vanilla knockback
+			}
+			target.netUpdate = true; // sync the new velocity in multiplayer
+		}
+
+		// Down-slash: pogo bounce (sets the player's velocity).
+		// Side swing: small pushback away from the enemy, added on top of the player's velocity.
+		public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
+		{
+			ApplyKnockback(target); // every enemy hit, before the once-per-swing player pushback below
+
+			if (bounced)
+			{
+				return;
+			}
+
+			Player owner = Main.player[Projectile.owner];
+			Vector2 attackDirection = Projectile.velocity.RotatedBy(-Projectile.ai[1] * MathHelper.PiOver2);
+			if (attackDirection.Y < -0.5f)
+			{
+				return; // up-slash: no pushback
+			}
+			bounced = true;
+
+			if (attackDirection.Y > 0.5f)
+			{
+				owner.velocity = -attackDirection * 8f;           // down-slash pogo
+			}
+			else
+			{
+				owner.velocity += -attackDirection * 2f;          // side swing: keeps existing momentum
+			}
 			owner.fallStart = (int)(owner.position.Y / 16f); // reset fall damage
 		}
 	}
