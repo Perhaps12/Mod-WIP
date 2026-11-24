@@ -228,6 +228,12 @@ namespace Wprint.Content.Projectiles
 			{
 				modifiers.SourceDamage *= ThrowDamageMultiplier;
 			}
+
+			Player owner = Main.player[Projectile.owner];
+			int directionFromPlayer = target.Center.X.CompareTo(owner.Center.X);
+			modifiers.HitDirectionOverride = directionFromPlayer == 0
+				? owner.direction
+				: directionFromPlayer;
 		}
 
 		public override void OnKill(int timeLeft)
