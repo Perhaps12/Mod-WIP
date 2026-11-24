@@ -92,7 +92,7 @@ namespace Wprint.Content.Items
 		// 37 23 20 17 3 are the weights.
 		{
 			new GunProfile(
-				nameKey: "Glock", weight: 30, damage: 32, critChance: 0, useTime: 13, magazineSize: 8,
+				nameKey: "Glock", weight: 30, damage: 35, critChance: 0, useTime: 13, magazineSize: 8,
 				knockback: 3f, useSound: new SoundStyle("Wprint/Sounds/GlockShot"), equipSound: new SoundStyle("Wprint/Sounds/GlockEquip"), shootSpeed: 12f,
 				inaccuracyDegrees: 0f, projectileTypeOverride: null, useGoldShortswordProjectile: false,
 				usesBulletAmmo: true, spriteItemType: ItemID.Handgun, tint: new Color(75, 105, 255)),
