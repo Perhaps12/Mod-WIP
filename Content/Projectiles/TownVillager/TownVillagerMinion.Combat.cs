@@ -9,7 +9,8 @@ namespace Wprint.Content.Projectiles
 	// ---- Combat: ranges, attack positioning, aiming and shooting ----
 	//   Melee:    walks right up to the enemy (and jumps at it); hits by touch (MinionContactDamage).
 	//   Midrange: keeps MidrangeMin-MidrangeMax away. Outside that band it walks to a random distance within it, then holds.
-	//   Ranged:   if farther than RangedMax, walks in to a random distance of RangedMin-RangedMax; otherwise stands still.
+	//   Ranged:   keeps RangedMin-RangedMax away, like midrange: outside that band (too close or too far) it walks
+	//             to a random distance within it, then holds.
 	// Distances are horizontal, since villagers walk on the ground.
 	public partial class TownVillagerMinion
 	{
@@ -302,8 +303,8 @@ namespace Wprint.Content.Projectiles
 					spread = 0.07f;
 					break;
 				case NPCID.Clothier: // Clothier's Curse skull that homes in on enemies
-					projectileType = ModContent.ProjectileType<VillagerHomingSkull>();
-					speed = VillagerHomingSkull.Speed; // flies at a constant speed, set in VillagerHomingSkull.cs
+					projectileType = ProjectileID.ClothiersCurse; // the real vanilla skull, for its visuals
+					speed = VillagerSkull.Speed; // homing, constant speed and piercing come from VillagerSkull.cs
 					break;
 				case NPCID.Wizard: // bouncing fireballs (Flower of Fire), thrown in an arc since they fall
 					projectileType = ProjectileID.BallofFire;

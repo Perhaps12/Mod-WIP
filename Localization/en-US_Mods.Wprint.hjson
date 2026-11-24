@@ -142,7 +142,6 @@ Projectiles: {
 	SharkBubble.DisplayName: Bubble
 	TownVillagerMinion.DisplayName: Town Villager Minion
 	TrackingSyringe.DisplayName: Healing Syringe
-	VillagerHomingSkull.DisplayName: Clothier's Curse
 
 	EokaBlastProjectile: {
 		DiplayName: EokaBlast

@@ -53,7 +53,7 @@ namespace Wprint.Content.Projectiles
 			45,  // Dryad (aura refresh)
 			12,   // Arms Dealer
 			82,  // Party Girl
-			52,  // Clothier
+			90,  // Clothier
 			38,  // Wizard
 			36,  // Steampunker (pause between bursts, see BurstShots in TownVillagerMinion.Combat.cs)
 			36,  // Princess
