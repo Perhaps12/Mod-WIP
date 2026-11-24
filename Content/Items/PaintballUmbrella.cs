@@ -68,6 +68,7 @@ namespace Wprint.Content.Items
 		{
 			Item.CloneDefaults(ItemID.OnyxBlaster);        // damage, use time, knockback, rarity, value, sound...
 			Item.damage = 40;                              // per paintball
+			Item.ArmorPenetration = 20;                    // ignores 20 enemy defense (passed on to the paintballs)
 			Item.shoot = ModContent.ProjectileType<GiantPaintball>();
 			Item.useAmmo = AmmoID.None;                    // paintballs are free, like the Paintball Gun
 			Item.shootSpeed = 15f;                         // much faster than the Onyx Blaster's shots
