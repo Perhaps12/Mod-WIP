@@ -74,6 +74,26 @@ Items: {
 			'''
 	}
 
+	Slushballer: {
+		DisplayName: Slushballer
+		Tooltip:
+			'''
+			A heavier Snowballer with 2.5 times the damage
+			Grows up to 3 times larger while reaching maximum size over the same horizontal travel distance
+			'''
+	}
+
+	EokaPistol: {
+		DisplayName: Eoka Pistol
+		Tooltip:
+			'''
+			Each shot has a 5% chance to fire instantly; otherwise it takes 1-9 ignition attempts, usually 2-3
+			Each attempt takes one use time
+			Fires a damaging cone in the locked aim direction and kicks you backward
+			Damage falls linearly after 9 blocks, reaching zero at maximum range
+			'''
+	}
+
 	RandomHandgun: {
 		DisplayName: Random Handgun
 		Tooltip:
@@ -103,6 +123,7 @@ Projectiles: {
 	GiantPaintball.DisplayName: Giant Paintball
 	SnowballProjectile.DisplayName: Snowball
 	ThrownGoldShortsword.DisplayName: Thrown Gold Shortsword
+	EokaBlastProjectile.DisplayName: Eoka Blast Projectile
 }
 
 Buffs: {

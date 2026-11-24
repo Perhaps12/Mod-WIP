@@ -24,7 +24,7 @@ namespace Wprint.Content.Projectiles
 			Projectile.friendly = true;
 			Projectile.hostile = false;
 			Projectile.DamageType = DamageClass.Ranged;
-			Projectile.penetrate = 3;
+			Projectile.penetrate = 5;
 			Projectile.timeLeft = 600;
 			Projectile.tileCollide = true;
 			Projectile.ignoreWater = true;

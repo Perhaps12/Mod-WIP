@@ -11,13 +11,13 @@ namespace Wprint.Content.Projectiles
 {
 	public class SnowballProjectile : ModProjectile
 	{
-		public const float MaxSnowballSize = 10f;
+		public const float MaxSnowballSize = 3f;
 		public const float ThrowDamageMultiplier = 1.5f;
 		public const int HeldMode = 0;
 		public const int ThrownMode = 1;
 		private const int FragmentMode = 2;
 		private const int BaseHitboxSize = 14;
-		private const float MovementDistancePerSize = 160f;
+		private const float BaseMovementDistancePerSize = 160f;
 		private const float Gravity = 0.35f;
 		private const float MaximumFallSpeed = 16f;
 		private static readonly SoundStyle SnowballHitSound = SoundID.Item51;
@@ -41,7 +41,7 @@ namespace Wprint.Content.Projectiles
 
 		public override void OnSpawn(Terraria.DataStructures.IEntitySource source)
 		{
-			float size = MathHelper.Clamp(Projectile.ai[0], 1f, MaxSnowballSize);
+			float size = MathHelper.Clamp(Projectile.ai[0], 1f, MaximumSnowballSize);
 			SetSize(size);
 			bool held = Projectile.ai[1] == HeldMode;
 			Projectile.tileCollide = !held;
@@ -63,7 +63,11 @@ namespace Wprint.Content.Projectiles
 		private void FollowOwnerAndGrow()
 		{
 			Player owner = Main.player[Projectile.owner];
-			if (!owner.active || owner.dead || owner.HeldItem.type != ModContent.ItemType<Snowballer>())
+			Snowballer heldItem = owner.HeldItem.ModItem as Snowballer;
+			if (!owner.active
+				|| owner.dead
+				|| heldItem == null
+				|| System.Math.Abs(heldItem.SnowballSizeMultiplier - SizeMultiplier) >= 0.001f)
 			{
 				Projectile.Kill();
 				return;
@@ -76,12 +80,12 @@ namespace Wprint.Content.Projectiles
 			{
 				float oldSize = Projectile.ai[0];
 				float newSize = MathHelper.Min(
-					MaxSnowballSize,
+					MaximumSnowballSize,
 					oldSize + System.Math.Abs(owner.velocity.X) / MovementDistancePerSize);
 				if (newSize != oldSize)
 				{
 					SetSize(newSize);
-					if (oldSize < MaxSnowballSize && newSize >= MaxSnowballSize)
+					if (oldSize < MaximumSnowballSize && newSize >= MaximumSnowballSize)
 					{
 						SoundEngine.PlaySound(SoundID.Item4 with { Volume = 0.35f, Pitch = 0.25f }, owner.Center);
 					}
@@ -119,6 +123,11 @@ namespace Wprint.Content.Projectiles
 			return new Vector2(x, owner.position.Y + owner.height);
 		}
 
+		private float SizeMultiplier => Projectile.ai[2] >= 1f ? Projectile.ai[2] : 1f;
+		private float MaximumSnowballSize => MaxSnowballSize * SizeMultiplier;
+		private float MovementDistancePerSize =>
+			BaseMovementDistancePerSize * (MaxSnowballSize - 1f) / (MaximumSnowballSize - 1f);
+
 		private void SetSize(float size)
 		{
 			Projectile.ai[0] = size;
@@ -141,15 +150,17 @@ namespace Wprint.Content.Projectiles
 			Projectile.netUpdate = true;
 		}
 
-		public static Projectile FindHeldSnowball(Player player)
+		public static Projectile FindHeldSnowball(Player player, float sizeMultiplier)
 		{
 			for (int i = 0; i < Main.maxProjectiles; i++)
 			{
 				Projectile projectile = Main.projectile[i];
+				float projectileSizeMultiplier = projectile.ai[2] >= 1f ? projectile.ai[2] : 1f;
 				if (projectile.active
 					&& projectile.owner == player.whoAmI
 					&& projectile.type == ModContent.ProjectileType<SnowballProjectile>()
-					&& projectile.ai[1] == HeldMode)
+					&& projectile.ai[1] == HeldMode
+					&& System.Math.Abs(projectileSizeMultiplier - sizeMultiplier) < 0.001f)
 				{
 					return projectile;
 				}
@@ -263,7 +274,9 @@ namespace Wprint.Content.Projectiles
 
 		public override bool PreDraw(ref Color lightColor)
 		{
-			Texture2D texture = TextureAssets.Projectile[Type].Value;
+			Texture2D texture = SizeMultiplier > 1f
+				? TextureAssets.Projectile[ProjectileID.SlushBall].Value
+				: TextureAssets.Projectile[Type].Value;
 			Vector2 drawPosition;
 			if (Projectile.ai[1] == HeldMode)
 			{
@@ -324,7 +337,8 @@ namespace Wprint.Content.Projectiles
 					Projectile.knockBack * 0.5f,
 					Projectile.owner,
 					fragmentSize,
-					FragmentMode);
+					FragmentMode,
+					Projectile.ai[2]);
 			}
 		}
 
