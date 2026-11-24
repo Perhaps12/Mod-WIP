@@ -365,7 +365,7 @@ namespace Wprint.Content.Projectiles
 
 		public static float ThrowSpeed(float size)
 		{
-			return 4f + (size - 1f) * 3f;
+			return 6f + (size - 1f) * 2.5f;
 		}
 	}
 }

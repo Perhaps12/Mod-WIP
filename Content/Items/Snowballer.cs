@@ -13,11 +13,19 @@ namespace Wprint.Content.Items
 
 		public override string Texture => $"Terraria/Images/Item_{ItemID.Snowball}";
 
+		public override void AddRecipes()
+		{
+			Recipe recipe = CreateRecipe();
+			recipe.AddIngredient(ItemID.Snowball, 999);
+			recipe.AddTile(TileID.IceMachine);
+			recipe.Register();
+		}
+
 		public override void SetDefaults()
 		{
 			Item.width = 32;
 			Item.height = 32;
-			Item.damage = 20;
+			Item.damage = 8;
 			Item.DamageType = DamageClass.Melee;
 			Item.useTime = 20;
 			Item.useAnimation = 20;
@@ -89,12 +97,12 @@ namespace Wprint.Content.Items
 			Item.damage = 20;
 		}
 
-		public override void AddRecipes()
-		{
-			Recipe recipe = CreateRecipe();
-			recipe.AddIngredient(ModContent.ItemType<Snowballer>(), 3);
-			recipe.AddTile(TileID.WorkBenches);
-			recipe.Register();
-		}
+		// public override void AddRecipes()
+		// {
+		// 	Recipe recipe = CreateRecipe();
+		// 	recipe.AddIngredient(ModContent.ItemType<Snowballer>(), 3);
+		// 	recipe.AddTile(TileID.WorkBenches);
+		// 	recipe.Register();
+		// }
 	}
 }
