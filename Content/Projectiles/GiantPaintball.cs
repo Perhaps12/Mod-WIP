@@ -5,6 +5,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Wprint.Content.NPCs;
 
 namespace Wprint.Content.Projectiles
 {
@@ -117,6 +118,9 @@ namespace Wprint.Content.Projectiles
 			}
 			if (debuffActive)
 				target.AddBuff(PaintDebuff, DebuffTicks);
+
+			// Every hit (direct or burst) paints the enemy for a few seconds
+			PaintedGlobalNPC.Paint(target, PaintColor);
 		}
 
 		// Collide with tiles using a small box, so the giant paintball doesn't pop on walls it only grazes

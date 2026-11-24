@@ -23,14 +23,20 @@ namespace Wprint.Content.Items
 			Item.useStyle = ItemUseStyleID.Shoot;   // no vanilla swing arc
 			Item.noMelee = true;                    // the item itself deals no damage; the slash does
 			Item.noUseGraphic = true;               // hide the held item; the slash projectile is drawn instead
-			Item.knockBack = 4f;
+			Item.knockBack = 6f;
 			Item.value = Item.buyPrice(silver: 1);
 			Item.rare = ItemRarityID.Blue;
 			Item.shoot = ModContent.ProjectileType<NailSlash>();
 			Item.shootSpeed = 1f;                   // must be > 0 or Shoot won't run
 			Item.UseSound = SoundID.Item1;
 			Item.autoReuse = true;
+			Item.scale = 0.95f;                      // slightly smaller base size; size prefixes (e.g. Legendary +15%) make up for it
 		}
+
+		// Allow sword reforges (Legendary, Large, Massive, ...). The Nail hides its held sprite, which would
+		// normally limit it to Universal reforges with no size. Size reaches the slash through
+		// GetAdjustedItemScale in Shoot, so it scales the hitbox, the slash and the drawn sword.
+		public override bool MeleePrefix() => true;
 
 		public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source,
 			Vector2 position, Vector2 velocity, int type, int damage, float knockback)
