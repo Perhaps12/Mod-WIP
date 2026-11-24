@@ -110,6 +110,11 @@ Items: {
 		AK-47: AK-47
 		Knife: Knife
 	}
+
+	SharkStaff: {
+		DisplayName: Shark Staff
+		Tooltip: Summons a shark that blows bubbles at nearby enemies
+	}
 }
 
 Projectiles: {
@@ -123,7 +128,6 @@ Projectiles: {
 	GiantPaintball.DisplayName: Giant Paintball
 	SnowballProjectile.DisplayName: Snowball
 	ThrownGoldShortsword.DisplayName: Thrown Gold Shortsword
-	EokaBlastProjectile.DisplayName: Eoka Blast Projectile
 }
 
 Buffs: {
@@ -146,5 +150,10 @@ Buffs: {
 	LaevateinnBurnBuff: {
 		DisplayName: Laevateinn Burn
 		Description: Burning damage increases with Laevateinn's charge
+	}
+
+	SharkMinionBuff: {
+		DisplayName: Shark
+		Description: A shark is fighting for you
 	}
 }
