@@ -26,7 +26,13 @@ namespace Wprint.Content.Projectiles
 			int frameCount = System.Math.Max(1, Main.npcFrameCount[VillagerType]);
 			int walkFrames = frameCount - NPCID.Sets.ExtraFramesCount[VillagerType] - 2;
 
-			if (frameCount <= 2 || walkFrames < 1)
+			int attackFrame = AttackAnimationFrame(frameCount); // TownVillagerMinion.AttackAnimation.cs
+			if (attackFrame >= 0)
+			{
+				Projectile.frame = attackFrame; // attacking
+				Projectile.frameCounter = 0;
+			}
+			else if (frameCount <= 2 || walkFrames < 1)
 			{
 				Projectile.frame = 0;
 			}
@@ -87,6 +93,7 @@ namespace Wprint.Content.Projectiles
 		public override void Unload()
 		{
 			villagerTextures.Clear();
+			glowTexture = null;
 		}
 
 		public override bool PreDraw(ref Color lightColor)
@@ -117,6 +124,8 @@ namespace Wprint.Content.Projectiles
 				frame.Size() / 2f,
 				Projectile.scale,
 				effects);
+
+			DrawAttackExtras(lightColor); // weapon in hand / magic glow (TownVillagerMinion.AttackAnimation.cs)
 			return false;
 		}
 	}

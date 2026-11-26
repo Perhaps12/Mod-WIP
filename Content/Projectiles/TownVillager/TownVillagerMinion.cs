@@ -13,6 +13,7 @@ namespace Wprint.Content.Projectiles
 	//   TownVillagerMinion.Combat.cs   - combat ranges, attack positioning, aiming and shooting
 	//   TownVillagerMinion.Dryad.cs    - the Dryad's ward aura
 	//   TownVillagerMinion.Drawing.cs  - animation and drawing
+	//   TownVillagerMinion.AttackAnimation.cs - attack frames, weapon in hand, magic glow
 	public partial class TownVillagerMinion : ModProjectile
 	{
 		private const int VillagerCount = 11;
@@ -47,7 +48,7 @@ namespace Wprint.Content.Projectiles
 		private static readonly int[] AttackIntervals =
 		{
 			48,  // Guide
-			40,  // Merchant
+			36,  // Merchant
 			90, // Demolitionist
 			20,  // Zoologist (melee: unused)
 			45,  // Dryad (aura refresh)
@@ -63,17 +64,17 @@ namespace Wprint.Content.Projectiles
 		// with the staff. (The Dryad doesn't deal damage, so hers is unused.)
 		private static readonly float[] DamageMultipliers =
 		{
-			1.00f, // Guide
-			1.25f, // Merchant
-			3.25f, // Demolitionist
-			0.85f, // Zoologist
-			2.00f, // Dryad (unused)
-			0.80f, // Arms Dealer
-			10.00f, // Party Girl
-			4.00f, // Clothier
-			4.00f, // Wizard
-			4.00f, // Steampunker
-			8.00f, // Princess
+			0.40f, // Guide
+			0.40f, // Merchant
+			1.50f, // Demolitionist
+			0.40f, // Zoologist
+			1.00f, // Dryad (unused)
+			0.40f, // Arms Dealer
+			5.00f, // Party Girl
+			2.00f, // Clothier
+			2.00f, // Wizard
+			2.00f, // Steampunker
+			4.00f, // Princess
 		};
 
 		// Damage for a villager summoned by a staff dealing staffDamage (used by the Towncall Staff)

@@ -21,7 +21,7 @@ namespace Wprint.Content.Items
 
 		public override void SetDefaults()
 		{
-			Item.damage = 20;
+			Item.damage = 40;
 			Item.knockBack = 2f;
 			Item.mana = 10;
 			Item.width = 32;

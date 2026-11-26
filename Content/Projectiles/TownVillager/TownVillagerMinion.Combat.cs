@@ -387,6 +387,9 @@ namespace Wprint.Content.Projectiles
 			}
 
 			SoundEngine.PlaySound(VillagerType == NPCID.Wizard ? SoundID.Item20 : SoundID.Item1, Projectile.Center);
+
+			// Play the villager's attack animation, aimed the way it fired (TownVillagerMinion.AttackAnimation.cs)
+			StartAttackAnimation(velocity != Vector2.Zero ? velocity : target.Center - Projectile.Center);
 		}
 
 		// ---- Aiming ----
