@@ -15,7 +15,7 @@ namespace Wprint.Content.Projectiles
 		private const float DamageFalloffStart = 9f * 16f;
 		private const float HalfAngle = MathHelper.Pi / 6f;
 		public const float MuzzleOffset = 20f;
-		private static readonly SoundStyle KillSound = new SoundStyle("Wprint/Sounds/AWPShot")
+		private static readonly SoundStyle KillSound = new SoundStyle("Wprint/Sounds/EokaKill")
 		{
 			Volume = 0.7f,
 			Pitch = -0.15f

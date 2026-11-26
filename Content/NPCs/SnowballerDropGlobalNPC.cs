@@ -18,7 +18,7 @@ namespace Wprint.Content.NPCs
 			}
 
 			int denominator = npc.type == NPCID.SnowBalla ? 25 : 100;
-			npcLoot.Add(ItemDropRule.Common(ModContent.ItemType<Snowballer>(), denominator));
+			npcLoot.Add(ItemDropRule.Common(ModContent.ItemType<Slushballer>(), denominator));
 		}
 	}
 }

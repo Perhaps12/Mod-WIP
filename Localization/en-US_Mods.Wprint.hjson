@@ -115,6 +115,16 @@ Items: {
 		DisplayName: Shark Staff
 		Tooltip: Summons a shark that blows bubbles at nearby enemies
 	}
+
+	TownCallStaff: {
+		DisplayName: Towncall Staff
+		Tooltip:
+			'''
+			Summons one unique villager minion per summon slot, in order
+			Guide, Merchant, Demolitionist, Zoologist, Dryad, Arms Dealer, Party Girl, Clothier, Wizard, Steampunker, Princess
+			Each villager is stronger than the last
+			'''
+	}
 }
 
 Projectiles: {
@@ -130,6 +140,8 @@ Projectiles: {
 	ThrownGoldShortsword.DisplayName: Thrown Gold Shortsword
 	SharkMinion.DisplayName: Shark
 	SharkBubble.DisplayName: Bubble
+	TownVillagerMinion.DisplayName: Town Villager Minion
+	TrackingSyringe.DisplayName: Healing Syringe
 
 	EokaBlastProjectile: {
 		DiplayName: EokaBlast
@@ -162,5 +174,10 @@ Buffs: {
 	SharkMinionBuff: {
 		DisplayName: Shark
 		Description: A shark is fighting for you
+	}
+
+	TownCallBuff: {
+		DisplayName: Towncall
+		Description: Your summoned villagers are fighting for you
 	}
 }

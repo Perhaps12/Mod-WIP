@@ -11,12 +11,12 @@ namespace Wprint.Content.Players
 	public class EokaPistolPlayer : ModPlayer
 	{
 		private const float PlayerRecoil = 5f;
-		private static readonly SoundStyle AttemptSound = new SoundStyle("Wprint/Sounds/RNGGunTick")
+		private static readonly SoundStyle AttemptSound = new SoundStyle("Wprint/Sounds/EokaStrike")
 		{
 			Volume = 0.55f,
 			PitchVariance = 0.15f
 		};
-		private static readonly SoundStyle FireSound = new SoundStyle("Wprint/Sounds/GlockShot")
+		private static readonly SoundStyle FireSound = new SoundStyle("Wprint/Sounds/EokaFire")
 		{
 			Volume = 0.8f,
 			PitchVariance = 0.08f
