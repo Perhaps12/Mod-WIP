@@ -142,29 +142,29 @@ namespace Wprint.Content.Projectiles
 				float strength = (float)System.Math.Sin(progress * MathHelper.Pi);
 				Color glow = GlowColor(VillagerType) * strength;
 				glow.A = 0; // additive
-				Texture2D glowTexture = GlowTexture.Value;
+				Texture2D glowSprite = MagicGlowTexture.Value;
 				Vector2 glowSpot = hand + new Vector2(dir * 6f, -6f);
-				Main.EntitySpriteDraw(glowTexture, glowSpot, null, glow, 0f, glowTexture.Size() / 2f,
+				Main.EntitySpriteDraw(glowSprite, glowSpot, null, glow, 0f, glowSprite.Size() / 2f,
 					GlowScale * (0.8f + 0.2f * strength), SpriteEffects.None);
-				Main.EntitySpriteDraw(glowTexture, glowSpot, null, glow * 0.6f, MathHelper.PiOver2, glowTexture.Size() / 2f,
+				Main.EntitySpriteDraw(glowSprite, glowSpot, null, glow * 0.6f, MathHelper.PiOver2, glowSprite.Size() / 2f,
 					GlowScale * 0.6f, SpriteEffects.None);
 				Lighting.AddLight(glowSpot + Main.screenPosition, GlowColor(VillagerType).ToVector3() * 0.5f * strength);
 			}
 		}
 
 		// Soft glow (vanilla's Extra_98 sparkle texture), loaded right away if the game hasn't yet
-		private static Asset<Texture2D> glowTexture;
-		private static Asset<Texture2D> GlowTexture
+		private static Asset<Texture2D> magicGlowTexture;
+		private static Asset<Texture2D> MagicGlowTexture
 		{
 			get
 			{
-				if (glowTexture == null)
+				if (magicGlowTexture == null)
 				{
-					glowTexture = TextureAssets.Extra[ExtrasID.SharpTears]; // Extra_98
-					if (!glowTexture.IsLoaded)
-						glowTexture = Main.Assets.Request<Texture2D>(glowTexture.Name, AssetRequestMode.ImmediateLoad);
+					magicGlowTexture = TextureAssets.Extra[ExtrasID.SharpTears]; // Extra_98
+					if (!magicGlowTexture.IsLoaded)
+						magicGlowTexture = Main.Assets.Request<Texture2D>(magicGlowTexture.Name, AssetRequestMode.ImmediateLoad);
 				}
-				return glowTexture;
+				return magicGlowTexture;
 			}
 		}
 	}

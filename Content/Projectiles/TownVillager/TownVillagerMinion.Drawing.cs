@@ -93,7 +93,7 @@ namespace Wprint.Content.Projectiles
 		public override void Unload()
 		{
 			villagerTextures.Clear();
-			glowTexture = null;
+			magicGlowTexture = null;
 		}
 
 		public override bool PreDraw(ref Color lightColor)
