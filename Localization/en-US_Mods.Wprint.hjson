@@ -126,8 +126,7 @@ Items: {
 		Tooltip:
 			'''
 			Summons one unique villager minion per summon slot, in order
-			Guide, Demolitionist, Painter, Nurse, Party Girl, Dryad, Arms Dealer, Clothier, Wizard, Steampunker, Princess
-			The Nurse heals you with tracking syringes; the Dryad grants her ward in an aura
+			Guide, Merchant, Demolitionist, Zoologist, Dryad, Arms Dealer, Party Girl, Clothier, Wizard, Steampunker, Princess
 			Each villager is stronger than the last
 			'''
 	}
