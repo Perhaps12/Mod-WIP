@@ -136,6 +136,33 @@ Items: {
 		Tooltip: Falls onto blocks or platforms and damages enemies that touch it
 	}
 
+	OneManBand: {
+		DisplayName: One-Man Band
+		Tooltip:
+			'''
+			Increase your max number of sentries by 1
+			Increases sentry damage by 8%
+			'''
+	}
+
+	SentryWhistle: {
+		DisplayName: Sentry Whistle
+		Tooltip:
+			'''
+			Teleports your sentries to your cursor
+			8-second cooldown
+			'''
+	}
+
+	AdvancedSentryWhistle: {
+		DisplayName: Advanced Sentry Whistle
+		Tooltip:
+			'''
+			Teleports your sentries to your cursor
+			3-second cooldown
+			'''
+	}
+
 	Nyrulna: {
 		DisplayName: Nyrulna
 		Tooltip:
