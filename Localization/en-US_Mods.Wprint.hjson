@@ -130,6 +130,11 @@ Items: {
 			Each villager is stronger than the last
 			'''
 	}
+
+	TentacleSentry: {
+		DisplayName: Tentacle Sentry
+		Tooltip: Falls onto blocks or platforms and damages enemies that touch it
+	}
 }
 
 Projectiles: {
@@ -149,6 +154,7 @@ Projectiles: {
 	SharkBubble.DisplayName: Bubble
 	TownVillagerMinion.DisplayName: Town Villager Minion
 	TrackingSyringe.DisplayName: Healing Syringe
+	TentacleSentryProjectile.DisplayName: Tentacle Sentry
 
 	EokaBlastProjectile: {
 		DiplayName: EokaBlast
