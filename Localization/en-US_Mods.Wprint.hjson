@@ -135,6 +135,15 @@ Items: {
 		DisplayName: Tentacle Sentry
 		Tooltip: Falls onto blocks or platforms and damages enemies that touch it
 	}
+
+	Nyrulna: {
+		DisplayName: Nyrulna
+		Tooltip:
+			'''
+			Left click to throw up to 30 tiles; hitting an enemy or block creates a Resonance Scepter burst
+			Right click to unleash an 8-tile cone that deals one quarter damage and heavy knockback
+			'''
+	}
 }
 
 Projectiles: {
@@ -155,6 +164,8 @@ Projectiles: {
 	TownVillagerMinion.DisplayName: Town Villager Minion
 	TrackingSyringe.DisplayName: Healing Syringe
 	TentacleSentryProjectile.DisplayName: Tentacle Sentry
+	NyrulnaThrownProjectile.DisplayName: Nyrulna
+	NyrulnaConeProjectile.DisplayName: Nyrulna Cone
 
 	EokaBlastProjectile: {
 		DiplayName: EokaBlast
