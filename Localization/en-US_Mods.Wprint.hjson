@@ -131,11 +131,6 @@ Items: {
 			'''
 	}
 
-	TentacleSentry: {
-		DisplayName: Tentacle Sentry
-		Tooltip: Falls onto blocks or platforms and damages enemies that touch it
-	}
-
 	OneManBand: {
 		DisplayName: One-Man Band
 		Tooltip:
@@ -161,6 +156,11 @@ Items: {
 			Teleports your sentries to your cursor
 			3-second cooldown
 			'''
+	}
+
+	SentrySkeletonStaff: {
+		DisplayName: Sentry Skeleton Staff
+		Tooltip: Summons a basic example sentry. Edit its item and projectile code to build your own sentry.
 	}
 
 	Nyrulna: {
@@ -190,7 +190,8 @@ Projectiles: {
 	SharkBubble.DisplayName: Bubble
 	TownVillagerMinion.DisplayName: Town Villager Minion
 	TrackingSyringe.DisplayName: Healing Syringe
-	TentacleSentryProjectile.DisplayName: Tentacle Sentry
+	SentrySkeletonProjectile.DisplayName: Example Sentry
+	SentrySkeletonShot.DisplayName: Sentry Bolt
 	NyrulnaThrownProjectile.DisplayName: Nyrulna
 	NyrulnaConeProjectile.DisplayName: Nyrulna Cone
 
