@@ -20,7 +20,8 @@ namespace Wprint
 		SyncCatchableAxeState,
 		LaevateinnChargeState,
 		LaevateinnResetCharge,
-		PaintNPC
+		PaintNPC,
+		EnergySwordChargeState
 	}
 
 	// Please read https://github.com/tModLoader/tModLoader/wiki/Basic-tModLoader-Modding-Guide#mod-skeleton-contents for more information about the various files in a mod.
@@ -110,6 +111,15 @@ namespace Wprint
 				if (Main.netMode == NetmodeID.Server)
 				{
 					PaintedGlobalNPC.SendPaint(npcIndex, color, -1, whoAmI);
+				}
+			}
+			else if (packetType == WprintPacketType.EnergySwordChargeState)
+			{
+				int playerIndex = reader.ReadByte();
+				bool hasCharge = reader.ReadBoolean();
+				if (Main.netMode == NetmodeID.MultiplayerClient && playerIndex < Main.maxPlayers)
+				{
+					Main.player[playerIndex].GetModPlayer<EnergySwordPlayer>().SetStoredCharge(hasCharge);
 				}
 			}
 		}

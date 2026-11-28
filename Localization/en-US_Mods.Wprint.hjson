@@ -24,7 +24,7 @@ Items: {
 
 	EnergySword: {
 		DisplayName: Energy Sword
-		Tooltip: Hold left click to charge; release to swing
+		Tooltip: Hold left click to charge for up to 5 seconds; release to swing. Hits store a charge for right-click explosion; without a stored charge, the explosion costs one third of your maximum life
 	}
 
 	Clawline: {
@@ -136,6 +136,7 @@ Projectiles: {
 	catchableaxeProjectile.DisplayName: catchableaxe Projectile
 	NailSlash.DisplayName: Nail Slash
 	EnergySwordSwing.DisplayName: Energy Sword Swing
+	EnergySwordExplosion.DisplayName: Energy Sword Explosion
 	ClawlineHook.DisplayName: Clawline Hook
 	BlastPackProjectile.DisplayName: Blast Pack
 	LaevateinnHoldProjectile.DisplayName: Laevateinn Hold Projectile

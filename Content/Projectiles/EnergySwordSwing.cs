@@ -5,6 +5,7 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Wprint.Content.Players;
 
 namespace Wprint.Content.Projectiles
 {
@@ -13,8 +14,6 @@ namespace Wprint.Content.Projectiles
 		private const int SwingTicks = 22;
 		private const float SwingCone = MathHelper.PiOver4;
 		private const float SwingReach = 112f;
-		private const float LightsBaneSlashScale = 2f;
-		private const int LightsBaneSlashLifetime = 60;
 
 		public override string Texture => $"Terraria/Images/Projectile_{ProjectileID.Excalibur}";
 
@@ -46,7 +45,7 @@ namespace Wprint.Content.Projectiles
 			Projectile.localAI[0]++;
 			float progress = Projectile.localAI[0] / SwingTicks;
 			float sweepDirection = Projectile.ai[0];
-			float chargeScale = Math.Max(1f, Projectile.ai[2]);
+			float chargeScale = Projectile.ai[2];
 			Projectile.rotation = Projectile.velocity.ToRotation()
 				- sweepDirection * MathHelper.PiOver2
 				+ sweepDirection * MathHelper.Pi * progress
@@ -69,31 +68,14 @@ namespace Wprint.Content.Projectiles
 				Lighting.AddLight(lightPosition, light);
 			}
 
-			if (progress >= 0.5f
-				&& Projectile.localAI[1] == 0f
+		}
+
+		public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
+		{
+			if (Projectile.ai[2] >= EnergySwordCharge.MaxSwingScale
 				&& Main.netMode != NetmodeID.MultiplayerClient)
 			{
-				Projectile.localAI[1] = 1f;
-				Vector2 slashPosition = Projectile.Center
-					+ swordDirection * (SwingReach * Projectile.ai[1] * chargeScale * 0.72f);
-				int slashDamage = Projectile.damage / 2;
-				float slashSize = LightsBaneSlashScale * chargeScale;
-				if (Main.rand.Next(100) < owner.GetCritChance(DamageClass.Melee))
-				{
-					slashDamage *= 2;
-					slashSize *= 2f;
-				}
-
-				Projectile slash = Projectile.NewProjectileDirect(
-					Projectile.GetSource_FromThis(),
-					slashPosition,
-					Projectile.velocity * 0.001f,
-					ProjectileID.LightsBane,
-					slashDamage,
-					Projectile.knockBack,
-					Projectile.owner,
-					slashSize);
-				slash.timeLeft = (int)(LightsBaneSlashLifetime * chargeScale);
+				Main.player[Projectile.owner].GetModPlayer<EnergySwordPlayer>().StoreCharge();
 			}
 		}
 
@@ -101,7 +83,7 @@ namespace Wprint.Content.Projectiles
 		{
 			return targetHitbox.IntersectsConeSlowMoreAccurate(
 				Projectile.Center,
-				SwingReach * Projectile.ai[1] * Math.Max(1f, Projectile.ai[2]),
+				SwingReach * Projectile.ai[1] * Projectile.ai[2],
 				Projectile.rotation,
 				SwingCone);
 		}
@@ -122,7 +104,7 @@ namespace Wprint.Content.Projectiles
 			float fade = Utils.Remap(progress, 0f, 0.55f, 0f, 1f)
 				* Utils.Remap(progress, 0.55f, 1f, 1f, 0f);
 			Vector2 drawPosition = Projectile.Center - Main.screenPosition;
-			float chargeScale = Math.Max(1f, Projectile.ai[2]);
+			float chargeScale = Projectile.ai[2];
 			float scale = Projectile.ai[1] * chargeScale * (112f / (110f / 1.4f));
 			float sweepDirection = Projectile.ai[0];
 			Texture2D slash = TextureAssets.Projectile[Type].Value;
